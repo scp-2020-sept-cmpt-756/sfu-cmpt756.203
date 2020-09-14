@@ -10,9 +10,9 @@ from flask import request
 from flask import Response
 
 app = Flask(__name__)
-
+bp = Blueprint('app', __name__)
 db = {
-    "name": "http://host.docker.internal:5002",
+    "name": "http://host.docker.internal:5002/api/v1",
     "endpoint": [
         "read",
         "write",
@@ -21,19 +21,19 @@ db = {
     ]
 }
 
-@app.route('/', methods=['GET'])
+@bp.route('/', methods=['GET'])
 def hello_world():
     return 'This is the default route for the users service. It is supposed to return a list of all the users (maybe implement via table cursor)'
 
-@app.route('/health')
+@bp.route('/health')
 def health():
     return Response("", status=200, mimetype="application/json")
 
-@app.route('/readiness')
+@bp.route('/readiness')
 def readiness():
     return Response("", status=200, mimetype="application/json")
 
-@app.route('/<user_id>', methods=['PUT'])
+@bp.route('/<user_id>', methods=['PUT'])
 def update_user(user_id):
     try:
         content = request.get_json()
@@ -47,7 +47,7 @@ def update_user(user_id):
     return (response.json())
 
 # this currently overwrites a user
-@app.route('/', methods=['POST'])
+@bp.route('/', methods=['POST'])
 def create_user():
     try:
         content = request.get_json()
@@ -60,21 +60,21 @@ def create_user():
     response = requests.post(url, json = {"objtype":"user","lname":lname, "email": email, "fname": fname})
     return (response.json())
 
-@app.route('/<user_id>', methods=['DELETE'])
+@bp.route('/<user_id>', methods=['DELETE'])
 def delete_user(user_id):
     url = db['name'] + '/' + db['endpoint'][2]
 
     response = requests.delete(url, params = {"objtype": "user", "objkey": user_id})
     return (response.json())
 
-@app.route('/<user_id>', methods=['GET'])
+@bp.route('/<user_id>', methods=['GET'])
 def get_user(user_id):
     payload = {"objtype": "user", "objkey": user_id}
     url = db['name'] + '/' + db['endpoint'][0]
     response = requests.get(url, params = payload)
     return (response.json())
 
-@app.route('/login', methods=['PUT'])
+@bp.route('/login', methods=['PUT'])
 def login():
     try: 
         content = request.get_json()
@@ -87,7 +87,7 @@ def login():
         encoded = jwt.encode({'user_id': uid, 'time': time.time()}, 'secret', algorithm='HS256')
     return encoded
 
-@app.route('/logoff', methods=['PUT'])
+@bp.route('/logoff', methods=['PUT'])
 def logoff():
     try: 
         content = request.get_json()
@@ -95,7 +95,7 @@ def logoff():
     except:
         return json.dumps({"message": "error reading parameters"})
     return {}
-
+app.register_blueprint(bp, url_prefix='/api/v1/')
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         logging.error("missing port arg 1")
