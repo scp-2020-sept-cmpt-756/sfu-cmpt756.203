@@ -10,7 +10,7 @@ from flask import Blueprint
 app = Flask(__name__)
 
 db = {
-    "name": "http://host.docker.internal:5002/api/v1",
+    "name": "http://host.docker.internal:5002/api/v1/datastore",
     "endpoint": [
         "read",
         "write",
@@ -72,7 +72,7 @@ def delete_song(music_id):
     response = requests.delete(url, params = { "objtype": "music", "objkey": music_id}, headers = {'Authorization': headers['Authorization']})
     return (response.json())
 
-app.register_blueprint(bp, url_prefix='/api/v1/')
+app.register_blueprint(bp, url_prefix='/api/v1/music/')
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:

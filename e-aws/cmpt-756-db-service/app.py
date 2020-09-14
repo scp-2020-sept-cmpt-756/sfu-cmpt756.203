@@ -107,7 +107,7 @@ def health():
 def readiness():
     return Response("", status=200, mimetype="application/json")
 
-app.register_blueprint(bp, url_prefix='/api/v1/')
+app.register_blueprint(bp, url_prefix='/api/v1/datastore/')
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:

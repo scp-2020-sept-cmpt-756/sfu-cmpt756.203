@@ -12,7 +12,7 @@ from flask import Response
 app = Flask(__name__)
 bp = Blueprint('app', __name__)
 db = {
-    "name": "http://host.docker.internal:5002/api/v1",
+    "name": "http://host.docker.internal:5002/api/v1/datastore",
     "endpoint": [
         "read",
         "write",
@@ -95,7 +95,7 @@ def logoff():
     except:
         return json.dumps({"message": "error reading parameters"})
     return {}
-app.register_blueprint(bp, url_prefix='/api/v1/')
+app.register_blueprint(bp, url_prefix='/api/v1/user/')
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         logging.error("missing port arg 1")
