@@ -29,8 +29,6 @@ dynamodb = boto3.resource('dynamodb',
 def update():
     headers = request.headers
     # check header here
-    if 'Authorization' not in headers:
-        return Response(json.dumps({"error": "missing auth"}), status=401, mimetype='application/json')
     content = request.get_json()
     objtype = urllib.parse.unquote_plus(request.args.get('objtype'))
     objkey = urllib.parse.unquote_plus(request.args.get('objkey'))
@@ -54,8 +52,6 @@ def update():
 def read():
     headers = request.headers
     # check header here
-    if 'Authorization' not in headers:
-        return Response(json.dumps({"error": "missing auth"}), status=401, mimetype='application/json')
     objtype = urllib.parse.unquote_plus(request.args.get('objtype'))
     objkey = urllib.parse.unquote_plus(request.args.get('objkey'))
     table_name = objtype.capitalize()
@@ -68,8 +64,6 @@ def read():
 def write():
     headers = request.headers
     # check header here
-    if 'Authorization' not in headers:
-        return Response(json.dumps({"error": "missing auth"}), status=401, mimetype='application/json')
     content = request.get_json()
     table_name = content['objtype'].capitalize()
     objtype = content['objtype']
@@ -89,8 +83,6 @@ def write():
 def delete():
     headers = request.headers
     # check header here
-    if 'Authorization' not in headers:
-        return Response(json.dumps({"error": "missing auth"}), status=401, mimetype='application/json')
     objtype = urllib.parse.unquote_plus(request.args.get('objtype'))
     objkey = urllib.parse.unquote_plus(request.args.get('objkey'))
     table_name = objtype.capitalize()
