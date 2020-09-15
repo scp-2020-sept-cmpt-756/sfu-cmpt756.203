@@ -8,7 +8,7 @@ import jwt
 import time
 from flask import request
 from flask import Response
-
+from flask import Blueprint
 app = Flask(__name__)
 bp = Blueprint('app', __name__)
 db = {
