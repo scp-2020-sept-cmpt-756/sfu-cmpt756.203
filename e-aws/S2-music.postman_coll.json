@@ -1,0 +1,37 @@
+{
+	"info": {
+		"_postman_id": "d51d7993-f942-48d3-9054-0ed342724746",
+		"name": "S2 (music)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Retrieve one song",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost:5001/api/v1/music/"
+			},
+			"response": []
+		},
+		{
+			"name": "Insert one song",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": "http://localhost:5001/api/v1/music/"
+			},
+			"response": []
+		},
+		{
+			"name": "Delete one song",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": "http://localhost:5001/api/v1/music/"
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}

@@ -1,0 +1,80 @@
+{
+	"info": {
+		"_postman_id": "308a17db-9a2c-49bb-b152-97f61c4b01a1",
+		"name": "DB (DynamoDB proxy)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Read an object",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Create an object",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Delete an object",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Update an object",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"sholmes@gmail.com\",\n    \"fname\": \"Sherlock\",\n    \"lname\": \"Holmes\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5002/api/v1/datastore?objtype=user&objkey=0c440fe0-85a6-454b-aab3-b9e66ddb8eae",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5002",
+					"path": [
+						"api",
+						"v1",
+						"datastore"
+					],
+					"query": [
+						{
+							"key": "objtype",
+							"value": "user"
+						},
+						{
+							"key": "objkey",
+							"value": "0c440fe0-85a6-454b-aab3-b9e66ddb8eae"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}

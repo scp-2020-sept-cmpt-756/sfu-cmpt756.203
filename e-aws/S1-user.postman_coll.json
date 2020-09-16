@@ -1,0 +1,80 @@
+{
+	"info": {
+		"_postman_id": "41828fcb-dbd8-41d0-8bec-11c93b3fccc2",
+		"name": "S1 (user)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "auth",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": "http://localhost:5000/api/v1/user/login/"
+					},
+					"response": []
+				},
+				{
+					"name": "Logoff",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": "http://localhost:5000/api/v1/user/logoff/"
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "CRUD",
+			"item": [
+				{
+					"name": "Create user",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fname\": \"Sherlock\",\n    \"email\": \"sholmes@baker.org\",\n    \"lname\": \"Holmes\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:5000/api/v1/user/",
+						"description": "Create Sherlock Holmes user"
+					},
+					"response": []
+				},
+				{
+					"name": "Update user",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": "http://localhost:5000/api/v1/user/"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete user",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "http://localhost:5000/api/v1/user/"
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"protocolProfileBehavior": {}
+}
