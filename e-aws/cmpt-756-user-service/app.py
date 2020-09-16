@@ -77,6 +77,10 @@ def delete_user(user_id):
 
 @bp.route('/<user_id>', methods=['GET'])
 def get_user(user_id):
+    headers = request.headers
+    # check header here
+    if 'Authorization' not in headers:
+        return Response(json.dumps({"error": "missing auth"}), status=401, mimetype='application/json')
     payload = {"objtype": "user", "objkey": user_id}
     url = db['name'] + '/' + db['endpoint'][0]
     response = requests.get(url, params = payload)
@@ -89,9 +93,10 @@ def login():
         uid = content['uid']
     except:
         return json.dumps({"message": "error reading parameters"})
-    url = db['name'] + '/' + db['endpoint'][3]
-    response = requests.get(url, params = {"user_id": uid})
-    if len(response) > 0:
+    url = db['name'] + '/' + db['endpoint'][0]
+    response = requests.get(url, params = {"objtype": "user", "objkey": uid})
+    data = response.json()
+    if len(data['Items']) > 0:
         encoded = jwt.encode({'user_id': uid, 'time': time.time()}, 'secret', algorithm='HS256')
     return encoded
 
