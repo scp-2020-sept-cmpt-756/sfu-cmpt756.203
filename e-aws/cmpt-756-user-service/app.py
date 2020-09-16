@@ -62,6 +62,10 @@ def create_user():
 
 @bp.route('/<user_id>', methods=['DELETE'])
 def delete_user(user_id):
+    headers = request.headers
+    # check header here
+    if 'Authorization' not in headers:
+        return Response(json.dumps({"error": "missing auth"}), status=401, mimetype='application/json')
     url = db['name'] + '/' + db['endpoint'][2]
 
     response = requests.delete(url, params = {"objtype": "user", "objkey": user_id})
