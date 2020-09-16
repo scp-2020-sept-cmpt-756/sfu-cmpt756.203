@@ -35,6 +35,10 @@ def readiness():
 
 @bp.route('/<user_id>', methods=['PUT'])
 def update_user(user_id):
+    headers = request.headers
+    # check header here
+    if 'Authorization' not in headers:
+        return Response(json.dumps({"error": "missing auth"}), status=401, mimetype='application/json')
     try:
         content = request.get_json()
         email = content['email']
