@@ -1,0 +1,276 @@
+{
+	"info": {
+		"_postman_id": "41828fcb-dbd8-41d0-8bec-11c93b3fccc2",
+		"name": "S1 (user)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "auth",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": "http://localhost:5000/api/v1/user/login/"
+					},
+					"response": [
+						{
+							"name": "Login",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"uid\": \"027c99ef-3e12-4fc9-aac8-172f877c2d24\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "http://localhost:5000/api/v1/user/login"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "html",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/html; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "183"
+								},
+								{
+									"key": "Server",
+									"value": "Werkzeug/1.0.1 Python/3.8.5"
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 25 Sep 2020 22:57:24 GMT"
+								}
+							],
+							"cookie": [],
+							"body": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiMDI3Yzk5ZWYtM2UxMi00ZmM5LWFhYzgtMTcyZjg3N2MyZDI0IiwidGltZSI6MTYwMTA3NDY0NC44MTIxNjg2fQ.hR5Gbw5t2VMpLcj8yDz1B6tcWsWCFNiHB_KHpvQVNls"
+						}
+					]
+				},
+				{
+					"name": "Logoff",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": "http://localhost:5000/api/v1/user/logoff/"
+					},
+					"response": [
+						{
+							"name": "Logoff",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"jwt\": \"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiMDI3Yzk5ZWYtM2UxMi00ZmM5LWFhYzgtMTcyZjg3N2MyZDI0IiwidGltZSI6MTYwMTA3NDY0NC44MTIxNjg2fQ.hR5Gbw5t2VMpLcj8yDz1B6tcWsWCFNiHB_KHpvQVNls\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "http://localhost:5000/api/v1/user/logoff"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "3"
+								},
+								{
+									"key": "Server",
+									"value": "Werkzeug/1.0.1 Python/3.8.5"
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 25 Sep 2020 22:58:35 GMT"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"jwt\": \"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiMDI3Yzk5ZWYtM2UxMi00ZmM5LWFhYzgtMTcyZjg3N2MyZDI0IiwidGltZSI6MTYwMTA3NDY0NC44MTIxNjg2fQ.hR5Gbw5t2VMpLcj8yDz1B6tcWsWCFNiHB_KHpvQVNls\"\n}\n"
+						}
+					]
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "CRUD",
+			"item": [
+				{
+					"name": "Create user",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fname\": \"Sherlock\",\n    \"email\": \"sholmes@baker.org\",\n    \"lname\": \"Holmes\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:5000/api/v1/user/",
+						"description": "Create Sherlock Holmes user"
+					},
+					"response": [
+						{
+							"name": "Create user",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"fname\": \"Tony\",\n    \"email\": \"tstark@starkindustry.com\",\n    \"lname\": \"Stark\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "http://localhost:5000/api/v1/user/"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "56"
+								},
+								{
+									"key": "Server",
+									"value": "Werkzeug/1.0.1 Python/3.8.5"
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 25 Sep 2020 22:54:10 GMT"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"user_id\": \"027c99ef-3e12-4fc9-aac8-172f877c2d24\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Update user",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": "http://localhost:5000/api/v1/user/"
+					},
+					"response": [
+						{
+							"name": "Update user",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"fname\": \"Tony (Ironman)\",\n    \"email\": \"tstark@starkindustry.com\",\n    \"lname\": \"Stark\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "http://localhost:5000/api/v1/user/027c99ef-3e12-4fc9-aac8-172f877c2d24"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "496"
+								},
+								{
+									"key": "Server",
+									"value": "Werkzeug/1.0.1 Python/3.8.5"
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 25 Sep 2020 23:12:23 GMT"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"ResponseMetadata\": {\n        \"HTTPHeaders\": {\n            \"connection\": \"keep-alive\",\n            \"content-length\": \"2\",\n            \"content-type\": \"application/x-amz-json-1.0\",\n            \"date\": \"Fri, 25 Sep 2020 23:12:23 GMT\",\n            \"server\": \"Server\",\n            \"x-amz-crc32\": \"2745614147\",\n            \"x-amzn-requestid\": \"JIHGVRINP53261MO37ERCQHC5RVV4KQNSO5AEMVJF66Q9ASUAAJG\"\n        },\n        \"HTTPStatusCode\": 200,\n        \"RequestId\": \"JIHGVRINP53261MO37ERCQHC5RVV4KQNSO5AEMVJF66Q9ASUAAJG\",\n        \"RetryAttempts\": 0\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Delete user",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "http://localhost:5000/api/v1/user/"
+					},
+					"response": [
+						{
+							"name": "Delete user",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": "http://localhost:5000/api/v1/user/027c99ef-3e12-4fc9-aac8-172f877c2d24"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "496"
+								},
+								{
+									"key": "Server",
+									"value": "Werkzeug/1.0.1 Python/3.8.5"
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 25 Sep 2020 23:12:30 GMT"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"ResponseMetadata\": {\n        \"HTTPHeaders\": {\n            \"connection\": \"keep-alive\",\n            \"content-length\": \"2\",\n            \"content-type\": \"application/x-amz-json-1.0\",\n            \"date\": \"Fri, 25 Sep 2020 23:12:30 GMT\",\n            \"server\": \"Server\",\n            \"x-amz-crc32\": \"2745614147\",\n            \"x-amzn-requestid\": \"S8CG32I706JI1KRM1R4DM78OQBVV4KQNSO5AEMVJF66Q9ASUAAJG\"\n        },\n        \"HTTPStatusCode\": 200,\n        \"RequestId\": \"S8CG32I706JI1KRM1R4DM78OQBVV4KQNSO5AEMVJF66Q9ASUAAJG\",\n        \"RetryAttempts\": 0\n    }\n}"
+						}
+					]
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"protocolProfileBehavior": {}
+}

@@ -1,0 +1,389 @@
+{
+	"info": {
+		"_postman_id": "308a17db-9a2c-49bb-b152-97f61c4b01a1",
+		"name": "DB (DynamoDB proxy)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Read an object",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": ""
+			},
+			"response": [
+				{
+					"name": "Read an object (song)",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5002/api/v1/datastore/read?objtype=music&objkey=2995bc8b-d872-4dd1-b396-93fde2f4bfff",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5002",
+							"path": [
+								"api",
+								"v1",
+								"datastore",
+								"read"
+							],
+							"query": [
+								{
+									"key": "objtype",
+									"value": "music"
+								},
+								{
+									"key": "objkey",
+									"value": "2995bc8b-d872-4dd1-b396-93fde2f4bfff"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "682"
+						},
+						{
+							"key": "Server",
+							"value": "Werkzeug/1.0.1 Python/3.8.5"
+						},
+						{
+							"key": "Date",
+							"value": "Fri, 25 Sep 2020 23:28:15 GMT"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"Count\": 1,\n    \"Items\": [\n        {\n            \"Artist\": \"Duran Duran\",\n            \"SongTitle\": \"Rio\",\n            \"music_id\": \"2995bc8b-d872-4dd1-b396-93fde2f4bfff\"\n        }\n    ],\n    \"ResponseMetadata\": {\n        \"HTTPHeaders\": {\n            \"connection\": \"keep-alive\",\n            \"content-length\": \"149\",\n            \"content-type\": \"application/x-amz-json-1.0\",\n            \"date\": \"Fri, 25 Sep 2020 23:28:15 GMT\",\n            \"server\": \"Server\",\n            \"x-amz-crc32\": \"3963260081\",\n            \"x-amzn-requestid\": \"J9PDAB1L3MQVLQHA6LFK2DKAIRVV4KQNSO5AEMVJF66Q9ASUAAJG\"\n        },\n        \"HTTPStatusCode\": 200,\n        \"RequestId\": \"J9PDAB1L3MQVLQHA6LFK2DKAIRVV4KQNSO5AEMVJF66Q9ASUAAJG\",\n        \"RetryAttempts\": 0\n    },\n    \"ScannedCount\": 1\n}"
+				},
+				{
+					"name": "Read an object (user)",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5002/api/v1/datastore/read?objtype=user&objkey=0c440fe0-85a6-454b-aab3-b9e66ddb8eae",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5002",
+							"path": [
+								"api",
+								"v1",
+								"datastore",
+								"read"
+							],
+							"query": [
+								{
+									"key": "objtype",
+									"value": "user"
+								},
+								{
+									"key": "objkey",
+									"value": "0c440fe0-85a6-454b-aab3-b9e66ddb8eae"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "713"
+						},
+						{
+							"key": "Server",
+							"value": "Werkzeug/1.0.1 Python/3.8.5"
+						},
+						{
+							"key": "Date",
+							"value": "Fri, 25 Sep 2020 23:21:39 GMT"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"Count\": 1,\n    \"Items\": [\n        {\n            \"email\": \"sholmes@gmail.com\",\n            \"fname\": \"Sherlock\",\n            \"lname\": \"Holmes\",\n            \"user_id\": \"0c440fe0-85a6-454b-aab3-b9e66ddb8eae\"\n        }\n    ],\n    \"ResponseMetadata\": {\n        \"HTTPHeaders\": {\n            \"connection\": \"keep-alive\",\n            \"content-length\": \"177\",\n            \"content-type\": \"application/x-amz-json-1.0\",\n            \"date\": \"Fri, 25 Sep 2020 23:21:39 GMT\",\n            \"server\": \"Server\",\n            \"x-amz-crc32\": \"3633613520\",\n            \"x-amzn-requestid\": \"FC719VKFMHL3HMGQL6JEQ2Q0RFVV4KQNSO5AEMVJF66Q9ASUAAJG\"\n        },\n        \"HTTPStatusCode\": 200,\n        \"RequestId\": \"FC719VKFMHL3HMGQL6JEQ2Q0RFVV4KQNSO5AEMVJF66Q9ASUAAJG\",\n        \"RetryAttempts\": 0\n    },\n    \"ScannedCount\": 1\n}"
+				}
+			]
+		},
+		{
+			"name": "Create an object",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": ""
+			},
+			"response": [
+				{
+					"name": "Create an object (user)",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"objtype\":\"user\",\n    \n    \"lname\": \"somelname\", \n    \"email\": \"some@domain.tld\", \n    \"fname\": \"somefname\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:5002/api/v1/datastore/write"
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "html",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "text/html; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "51"
+						},
+						{
+							"key": "Server",
+							"value": "Werkzeug/1.0.1 Python/3.8.5"
+						},
+						{
+							"key": "Date",
+							"value": "Fri, 25 Sep 2020 23:26:35 GMT"
+						}
+					],
+					"cookie": [],
+					"body": "{\"user_id\": \"ee77100a-037a-42d2-a3fc-d00bc978e507\"}"
+				},
+				{
+					"name": "Create an object (song)",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"objtype\": \"music\", \n\n    \"Artist\": \"U2\", \n    \"SongTitle\": \"Rattle & Hum\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:5002/api/v1/datastore/write"
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "html",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "text/html; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "52"
+						},
+						{
+							"key": "Server",
+							"value": "Werkzeug/1.0.1 Python/3.8.5"
+						},
+						{
+							"key": "Date",
+							"value": "Fri, 25 Sep 2020 23:30:06 GMT"
+						}
+					],
+					"cookie": [],
+					"body": "{\"music_id\": \"8ed63e4f-3b1e-47f8-beb8-3604516e5a2d\"}"
+				}
+			]
+		},
+		{
+			"name": "Delete an object",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": ""
+			},
+			"response": [
+				{
+					"name": "Delete an object",
+					"originalRequest": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5002/api/v1/datastore/delete?objtype=user&objkey=2995bc8b-d872-4dd1-b396-93fde2f4bfff",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5002",
+							"path": [
+								"api",
+								"v1",
+								"datastore",
+								"delete"
+							],
+							"query": [
+								{
+									"key": "objtype",
+									"value": "user"
+								},
+								{
+									"key": "objkey",
+									"value": "2995bc8b-d872-4dd1-b396-93fde2f4bfff"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "496"
+						},
+						{
+							"key": "Server",
+							"value": "Werkzeug/1.0.1 Python/3.8.5"
+						},
+						{
+							"key": "Date",
+							"value": "Fri, 25 Sep 2020 23:31:52 GMT"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"ResponseMetadata\": {\n        \"HTTPHeaders\": {\n            \"connection\": \"keep-alive\",\n            \"content-length\": \"2\",\n            \"content-type\": \"application/x-amz-json-1.0\",\n            \"date\": \"Fri, 25 Sep 2020 23:31:52 GMT\",\n            \"server\": \"Server\",\n            \"x-amz-crc32\": \"2745614147\",\n            \"x-amzn-requestid\": \"6EPFVNH3DVIAF03JPG26J98HRFVV4KQNSO5AEMVJF66Q9ASUAAJG\"\n        },\n        \"HTTPStatusCode\": 200,\n        \"RequestId\": \"6EPFVNH3DVIAF03JPG26J98HRFVV4KQNSO5AEMVJF66Q9ASUAAJG\",\n        \"RetryAttempts\": 0\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "Update an object",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"sholmes@gmail.com\",\n    \"fname\": \"Sherlock\",\n    \"lname\": \"Holmes\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5002/api/v1/datastore?objtype=user&objkey=0c440fe0-85a6-454b-aab3-b9e66ddb8eae",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5002",
+					"path": [
+						"api",
+						"v1",
+						"datastore"
+					],
+					"query": [
+						{
+							"key": "objtype",
+							"value": "user"
+						},
+						{
+							"key": "objkey",
+							"value": "0c440fe0-85a6-454b-aab3-b9e66ddb8eae"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Update an object",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"jwatson@baker.org\",\n  \"fname\": \"John Hamish\",\n  \"lname\": \"Watson\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5002/api/v1/datastore/update?objtype=user&objkey=5f761f85-53df-4e72-8414-9fe0d58779d1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5002",
+							"path": [
+								"api",
+								"v1",
+								"datastore",
+								"update"
+							],
+							"query": [
+								{
+									"key": "objtype",
+									"value": "user"
+								},
+								{
+									"key": "objkey",
+									"value": "5f761f85-53df-4e72-8414-9fe0d58779d1"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "496"
+						},
+						{
+							"key": "Server",
+							"value": "Werkzeug/1.0.1 Python/3.8.5"
+						},
+						{
+							"key": "Date",
+							"value": "Fri, 25 Sep 2020 23:37:22 GMT"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"ResponseMetadata\": {\n        \"HTTPHeaders\": {\n            \"connection\": \"keep-alive\",\n            \"content-length\": \"2\",\n            \"content-type\": \"application/x-amz-json-1.0\",\n            \"date\": \"Fri, 25 Sep 2020 23:37:22 GMT\",\n            \"server\": \"Server\",\n            \"x-amz-crc32\": \"2745614147\",\n            \"x-amzn-requestid\": \"ACPOL0Q0AFAQP1RCQ5B18T5O1NVV4KQNSO5AEMVJF66Q9ASUAAJG\"\n        },\n        \"HTTPStatusCode\": 200,\n        \"RequestId\": \"ACPOL0Q0AFAQP1RCQ5B18T5O1NVV4KQNSO5AEMVJF66Q9ASUAAJG\",\n        \"RetryAttempts\": 0\n    }\n}"
+				}
+			]
+		}
+	],
+	"protocolProfileBehavior": {}
+}

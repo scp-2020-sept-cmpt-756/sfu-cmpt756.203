@@ -1,0 +1,142 @@
+{
+	"info": {
+		"_postman_id": "d51d7993-f942-48d3-9054-0ed342724746",
+		"name": "S2 (music)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Retrieve one song",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost:5001/api/v1/music/"
+			},
+			"response": [
+				{
+					"name": "Retrieve one song",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:5001/api/v1/music/b5a4222d-7b09-437d-8c13-8cca68eeaa34"
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "526"
+						},
+						{
+							"key": "Server",
+							"value": "Werkzeug/1.0.1 Python/3.8.5"
+						},
+						{
+							"key": "Date",
+							"value": "Fri, 25 Sep 2020 23:04:17 GMT"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"Count\": 1,\n    \"Items\": [\n        {\n            \"Artist\": \"Duran Duran\",\n            \"SongTitle\": \"Rio\",\n            \"music_id\": \"b5a4222d-7b09-437d-8c13-8cca68eeaa34\"\n        }\n    ],\n    \"ResponseMetadata\": {\n        \"HTTPHeaders\": {\n            \"connection\": \"keep-alive\",\n            \"content-length\": \"149\",\n            \"content-type\": \"application/x-amz-json-1.0\",\n            \"date\": \"Fri, 25 Sep 2020 23:04:16 GMT\",\n            \"server\": \"Server\",\n            \"x-amz-crc32\": \"2921592074\",\n            \"x-amzn-requestid\": \"O5R5MA59ROOT0HUU6TP7NCHBT7VV4KQNSO5AEMVJF66Q9ASUAAJG\"\n        },\n        \"HTTPStatusCode\": 200,\n        \"RequestId\": \"O5R5MA59ROOT0HUU6TP7NCHBT7VV4KQNSO5AEMVJF66Q9ASUAAJG\",\n        \"RetryAttempts\": 0\n    },\n    \"ScannedCount\": 1\n}"
+				}
+			]
+		},
+		{
+			"name": "Insert one song",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": "http://localhost:5001/api/v1/music/"
+			},
+			"response": [
+				{
+					"name": "Insert one song",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n     \"Artist\": \"Duran Duran\", \n     \"SongTitle\": \"Rio\" \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:5001/api/v1/music/"
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "52"
+						},
+						{
+							"key": "Server",
+							"value": "Werkzeug/1.0.1 Python/3.8.5"
+						},
+						{
+							"key": "Date",
+							"value": "Fri, 25 Sep 2020 23:06:19 GMT"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"music_id\": \"2995bc8b-d872-4dd1-b396-93fde2f4bfff\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Delete one song",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": "http://localhost:5001/api/v1/music/"
+			},
+			"response": [
+				{
+					"name": "Delete one song",
+					"originalRequest": {
+						"method": "DELETE",
+						"header": [],
+						"url": "http://localhost:5001/api/v1/music/b5a4222d-7b09-437d-8c13-8cca68eeaa34"
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "394"
+						},
+						{
+							"key": "Server",
+							"value": "Werkzeug/1.0.1 Python/3.8.5"
+						},
+						{
+							"key": "Date",
+							"value": "Fri, 25 Sep 2020 23:04:36 GMT"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"ResponseMetadata\": {\n        \"HTTPHeaders\": {\n            \"connection\": \"keep-alive\",\n            \"content-length\": \"2\",\n            \"content-type\": \"application/x-amz-json-1.0\",\n            \"date\": \"Fri, 25 Sep 2020 23:04:36 GMT\",\n            \"server\": \"Server\",\n            \"x-amz-crc32\": \"2745614147\",\n            \"x-amzn-requestid\": \"402FGDT5RP8BEGM3T88C75EE5VVV4KQNSO5AEMVJF66Q9ASUAAJG\"\n        },\n        \"HTTPStatusCode\": 200,\n        \"RequestId\": \"402FGDT5RP8BEGM3T88C75EE5VVV4KQNSO5AEMVJF66Q9ASUAAJG\",\n        \"RetryAttempts\": 0\n    }\n}"
+				}
+			]
+		}
+	],
+	"protocolProfileBehavior": {}
+}

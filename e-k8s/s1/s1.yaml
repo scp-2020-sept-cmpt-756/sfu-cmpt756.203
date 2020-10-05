@@ -1,0 +1,78 @@
+#
+# SFU CMPT 756.203
+#
+# k8s yaml to deploy:
+#   1 Deployment - this governs the logic (container)
+#   1 Service - this opens up the logic
+#   1 Service Account - this enable access control
+#
+# Notes:
+#
+# 1. the Service's .spec.ports[0] need to matches the Deployment's
+#    .spec.template.spec.containers[0].ports
+# 2. Deployment's .spec.template.spec.containers.livenessProbe & readinessProbe
+#    can be removed to clean up the logs
+#
+apiVersion: v1
+kind: Service
+metadata:
+  name: cmpt756s1
+  labels:
+    app: cmpt756s1
+spec:
+  ports:
+  - port: 30000
+    name: http
+  selector:
+    app: cmpt756s1
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: svc-s1
+  labels:
+    account: SVC_S1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cmpt756s1
+  labels:
+    app: cmpt756s1
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cmpt756s1
+      version: v1
+  template:
+    metadata:
+      name: service1-pod
+      labels:
+        app: cmpt756s1
+        version: v1
+    spec:
+      serviceAccountName: svc-s1
+      containers:
+      - name: service1
+        image: docker.io/overcoil/cmpt756s1:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 30000
+        livenessProbe:
+          httpGet:
+            path: /api/v1/user/health
+            port: 30000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: /api/v1/user/readiness
+            port: 30000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 2
+          successThreshold: 1
+          failureThreshold: 5
