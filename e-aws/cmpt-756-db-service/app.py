@@ -16,9 +16,10 @@ bp = Blueprint('app', __name__)
 with open('config.json') as file:
     data = json.load(file)
 dynamodb = boto3.resource('dynamodb', 
-                      region_name='us-west-2', 
+                      region_name='us-east-1', 
                       aws_access_key_id=data['AWS_ACCESS_KEY_ID'], 
-                      aws_secret_access_key=data['AWS_SECRET_ACCESS_KEY'])
+                      aws_secret_access_key=data['AWS_SECRET_ACCESS_KEY'],
+                      aws_session_token=data['AWS_SESSION_TOKEN'])
 
 # This uses a sample table "Music" in the AWS DynamoDB tutorial code. The code is different than the examples due to putting it in a Flask server, but functionality is the same.
 
