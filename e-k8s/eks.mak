@@ -86,10 +86,7 @@ reinstate:
 	$(IC) install --set profile=demo | tee -a eks-reinstate.log
 
 setupdashboard:
-	$(KC) apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.3.6/components.yaml
-	$(KC) get deployment metrics-server -n kube-system
-	$(KC) apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta8/aio/deploy/recommended.yaml
-	$(KC) apply -f aux/eks-admin-service-account.yaml
-
+	echo TODO
+	
 showcontext:
 	$(KC) config get-contexts
