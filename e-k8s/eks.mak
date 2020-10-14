@@ -36,7 +36,7 @@ start: showcontext
 
 
 stop:
-	$(EKS) delete cluster --name $(CLUSTERNAME) --region $(REGION)
+	$(EKS) delete cluster --name $(CLUSTERNAME) --region $(REGION) | tee eks-delete.log
 
 up:
 	$(EKS) create nodegroup --cluster $(CLUSTERNAME) --region $(REGION) --name $(NGROUP) --node-type $(NTYPE) --nodes 2 --nodes-min 2 --nodes-min 2 --managed | tee repl-nodes.log
