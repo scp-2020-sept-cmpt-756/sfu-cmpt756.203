@@ -34,7 +34,10 @@ start:
 	$(MK) start --kubernetes-version='$(KVER)' | tee mk-cluster.log
 
 stop: showcontext
-	$(MK) stop | tee mk-delete.log
+	$(MK) stop | tee mk-stop.log
+
+delete: showcontext
+	$(MK) delete | tee mk-delete.log
 
 # output: mk-status.log
 status: showcontext
