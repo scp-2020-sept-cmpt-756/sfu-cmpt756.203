@@ -26,7 +26,7 @@ CTX=aws756
 
 
 NGROUP=worker-nodes
-NTYPE=t3.small
+NTYPE=t2.medium
 REGION=us-east-1
 KVER=1.17
 
