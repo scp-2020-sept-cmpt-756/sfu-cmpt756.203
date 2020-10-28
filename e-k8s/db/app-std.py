@@ -17,7 +17,8 @@ with open('config.json') as file:
     data = json.load(file)
 dynamodb = boto3.resource('dynamodb', 
                       region_name='us-west-2', 
-                      aws_access_key_id=data['AWS_ACCESS_KEY_ID'])
+                      aws_access_key_id=data['AWS_ACCESS_KEY_ID'], 
+                      aws_secret_access_key=data['AWS_SECRET_ACCESS_KEY'])
 
 
 # Change the implementation of this: you should probably have a separate driver class for interfacing with a db like dynamodb in a different file.

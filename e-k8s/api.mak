@@ -24,7 +24,7 @@ PODS1=pod/cmpt756s1-8557865b4b-jnwrj
 PODCONT=service1
 
 logs:
-	$(KC) logs $(PODS1) -c service1
+	$(KC) logs $(PODS1) -c $(PODCONT)
 
 #
 # Replace this with the external IP/DNS name of your cluster
