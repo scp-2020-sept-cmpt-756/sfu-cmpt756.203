@@ -56,7 +56,7 @@ spec:
       serviceAccountName: svc-db
       containers:
       - name: cmpt756db
-        image: docker.io/overcoil/cmpt756db:latest
+        image: docker.io/<YOURNAME>/cmpt756db:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 30002
