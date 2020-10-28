@@ -13,7 +13,7 @@
 #
 
 # your DockerHub account id
-REGID=overcoil
+REGID=your-DockerHub-id
 
 KC=kubectl
 DK=docker
