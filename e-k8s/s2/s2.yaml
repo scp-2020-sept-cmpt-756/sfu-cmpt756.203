@@ -56,7 +56,7 @@ spec:
       serviceAccountName: svc-s2
       containers:
       - name: service2
-        image: docker.io/overcoil/cmpt756s2:latest
+        image: docker.io/<YOURNAME>/cmpt756s2:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 30001
