@@ -35,7 +35,7 @@ s2: s2.svc.log
 db: db.svc.log
 
 gw.svc.log:
-	$(KC) -n $(NS) apply -f aux/service-gateway.yaml | tee gw.svc.log
+	$(KC) -n $(NS) apply -f misc/service-gateway.yaml | tee gw.svc.log
 
 s1.svc.log:
 	$(KC) -n $(NS) apply -f s1/s1.yaml | tee s1.svc.log
