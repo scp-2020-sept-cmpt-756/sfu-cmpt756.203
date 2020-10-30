@@ -12,6 +12,7 @@
 # Where possible, stodout outputs are tee into .out files for later review.
 #
 
+REGID=your-DockerHub-id
 
 DK=docker
 PORTFAMILY=5
@@ -26,33 +27,33 @@ clean:
 	rm {s1,s2,db}.{img,repo,svc}.log
 
 s1.svc.log: s1.repo.log
-	$(DK) run -t --publish 5000:5000 --detach --name s1 overcoil/cmpt756s1:latest | tee s1.svc.log
+	$(DK) run -t --publish 5000:5000 --detach --name s1 $(REGID)/cmpt756s1:latest | tee s1.svc.log
 
 s1.repo.log: s1.img.log
-	$(DK) push overcoil/cmpt756s1:latest | tee s1.repo.log
+	$(DK) push $(REGID)/cmpt756s1:latest | tee s1.repo.log
 
 s1.img.log: s1/Dockerfile s1/app.py
-	$(DK) build -t overcoil/cmpt756s1:latest s1 | tee s1.img.log
+	$(DK) build -t $(REGID)/cmpt756s1:latest s1 | tee s1.img.log
 
 
 s2.svc.log: s2.repo.log
-	$(DK) run -t --publish 5001:5001 --detach --name s2 overcoil/cmpt756s2:latest | tee s2.svc.log
+	$(DK) run -t --publish 5001:5001 --detach --name s2 $(REGID)/cmpt756s2:latest | tee s2.svc.log
 
 s2.repo.log: s2.img.log
-	$(DK) push overcoil/cmpt756s2:latest | tee s2.repo.log
+	$(DK) push $(REGID)/cmpt756s2:latest | tee s2.repo.log
 
 s2.img.log: s2/Dockerfile s2/app.py
-	$(DK) build -t overcoil/cmpt756s2:latest s2 | tee s2.img.log
+	$(DK) build -t $(REGID)/cmpt756s2:latest s2 | tee s2.img.log
 
 
 db.svc.log: db.repo.log
-	$(DK) run -t --publish 5002:5002 --detach --name db overcoil/cmpt756db:latest | tee db.svc.log
+	$(DK) run -t --publish 5002:5002 --detach --name db $(REGID)/cmpt756db:latest | tee db.svc.log
 
 db.repo.log: db.img.log
-	$(DK) push overcoil/cmpt756db:latest | tee db.repo.log
+	$(DK) push $(REGID)/cmpt756db:latest | tee db.repo.log
 
 db.img.log: db/Dockerfile db/app.py
-	$(DK) build -t overcoil/cmpt756db:latest db | tee db.img.log
+	$(DK) build -t $(REGID)/cmpt756db:latest db | tee db.img.log
 
 godocker:
 	cp s1/Dockerfile.d s1/Dockerfile
