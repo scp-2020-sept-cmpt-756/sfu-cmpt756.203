@@ -23,7 +23,7 @@ db = {
 
 @bp.route('/', methods=['GET'])
 def hello_world():
-    return 'This is the default route for the users service. It is supposed to return a list of all the users (maybe implement via table cursor)'
+    return 'If you are reading this in a browser, your service is operational. Switch to curl/Postman/etc to interact using the other HTTP verbs.'
 
 @bp.route('/health')
 def health():
