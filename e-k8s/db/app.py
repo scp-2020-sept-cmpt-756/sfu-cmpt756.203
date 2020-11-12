@@ -6,6 +6,7 @@ import boto3
 import simplejson as json
 import urllib.parse
 import uuid
+import os
 from boto3.dynamodb.conditions import Key, Attr
 from flask import request
 from flask import Response
@@ -13,12 +14,33 @@ from flask import Blueprint
 
 app = Flask(__name__)
 bp = Blueprint('app', __name__)
-with open('config.json') as file:
-    data = json.load(file)
-dynamodb = boto3.resource('dynamodb', 
-                      region_name='us-west-2', 
-                      aws_access_key_id=data['AWS_ACCESS_KEY_ID'], 
-                      aws_secret_access_key=data['AWS_SECRET_ACCESS_KEY'])
+#with open('config.json') as file:
+#    data = json.load(file)
+
+# default to us-east-1 if no region is specified
+# (us-east-1 is the default/only supported region for a starter account)
+region = os.getenv('AWS_REGION', 'us-east-1')
+
+# these must be present; if they are missing, we should probably bail now
+access_key = os.getenv('AWS_ACCESS_KEY_ID')
+secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
+
+# this is only needed for starter accounts
+session_token = os.getenv('AWS_SESSION_TOKEN')
+
+# if session_token is not present in the environment, assume it is a 
+# standard acct which doesn't need one; otherwise, add it on.
+if ( not session_token )
+  dynamodb = boto3.resource('dynamodb', 
+                      region_name=region,
+                      aws_access_key_id=access_key,
+                      aws_secret_access_key=secret_access_key)
+else
+  dynamodb = boto3.resource('dynamodb', 
+                      region_name=region,
+                      aws_access_key_id=access_key,
+                      aws_secret_access_key=secret_access_key,
+		      aws_session_token=session_token)
 
 
 # Change the implementation of this: you should probably have a separate driver class for interfacing with a db like dynamodb in a different file.

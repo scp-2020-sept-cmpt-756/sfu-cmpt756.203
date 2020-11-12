@@ -1,5 +1,0 @@
-{
-    "AWS_ACCESS_KEY_ID":"your-starter-account-access-key",
-    "AWS_SECRET_ACCESS_KEY": "your-starter-account-secret-access-key",
-    "AWS_SESSION_TOKEN": "your-starter-account-session-key"
-}

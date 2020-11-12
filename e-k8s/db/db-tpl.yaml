@@ -1,0 +1,93 @@
+#
+# SFU CMPT 756.203
+#
+# k8s yaml to deploy:
+#   1 Deployment - this governs the logic (container)
+#   1 Service - this opens up the logic
+#   1 Service Account - this enable access control
+#
+# Notable observations:
+#
+# 1. the Service's .spec.ports[0] need to matches the Deployment's
+#    .spec.template.spec.containers[0].ports
+# 2. Deployment's .spec.template.spec.containers.livenessProbe & readinessProbe
+#    can be removed to clean up the logs
+# 3. You must supply your AWS specifics in the secret resource
+#
+apiVersion: v1
+kind: Service
+metadata:
+  name: cmpt756db
+  labels:
+    app: cmpt756db
+spec:
+  ports:
+  - port: 30002
+    name: http
+  selector:
+    app: cmpt756db
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: awscred
+type: Opaque
+stringData:
+  AWS_REGION: us-east-1
+  AWS_ACCESS_KEY_ID: your-access-key
+  AWS_SECRET_ACCESS_KEY: your-secret-access-key
+  AWS_SESSION_TOKEN: your-session-token
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: svc-db
+  labels:
+    account: SVC_DB
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cmpt756db
+  labels:
+    app: cmpt756db
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cmpt756db
+      version: v1
+  template:
+    metadata:
+      name: database-pod
+      labels:
+        app: cmpt756db
+        version: v1
+    spec:
+      serviceAccountName: svc-db
+      containers:
+      - name: cmpt756db
+        image: docker.io/<YOURNAME>/cmpt756db:latest
+        imagePullPolicy: Always
+        envFrom:
+        - secretRef:
+            name: awscred
+        ports:
+        - containerPort: 30002
+        livenessProbe:
+          httpGet:
+            path: /api/v1/datastore/health
+            port: 30002
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: /api/v1/datastore/readiness
+            port: 30002
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 2
+          successThreshold: 1
+          failureThreshold: 5
