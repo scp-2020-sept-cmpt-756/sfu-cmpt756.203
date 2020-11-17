@@ -14,9 +14,6 @@
 #
 
 
-# specify yor DockerHub id here
-REGID=overcoil
-
 KC=kubectl
 DK=docker
 HELM=helm
