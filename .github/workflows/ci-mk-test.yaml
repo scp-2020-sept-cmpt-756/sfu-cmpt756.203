@@ -54,21 +54,20 @@ jobs:
           minikube version: 'v1.13.1'
           kubernetes version: 'v1.19.2'
           github token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Install istioctl
+            
+      - name: Install istioctl onto runner & install istio into Minikube
         run: |
-          pwd
           cd ~
-          pwd
           curl -sL https://istio.io/downloadIstioctl | sh -
-          ls -l ~/.istioctl/bin
           ls -l $HOME/.istioctl/bin
-          echo $PATH
           export PATH=$PATH:$HOME/.istioctl/bin
-          echo $PATH
-          pwd
+          $HOME/.istioctl/bin/istioctl install --set profile=demo
+
       - name: Deploy s1
         run: |
           cd ${{ github.workspace }}/e-k8s
+          
+
           make -f mk.mak reinstate
           kubectl -n cmpt756e4 apply -f s1/s1.yaml
           kubectl get nodes
