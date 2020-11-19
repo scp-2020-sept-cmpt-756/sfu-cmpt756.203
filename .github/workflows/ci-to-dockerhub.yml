@@ -1,0 +1,83 @@
+name: CI up to DockerHub
+
+on:
+  workflow_dispatch:
+    branches: [ main ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+      -
+        name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        name: instantiate all the templatized files and sub in secrets 
+        run: |
+          sed 's/your-DockerHub-id/${{ secrets.DOCKERHUB_USERNAME }}/' ${{ github.workspace }}/e-k8s/k8s-tpl.mak > ${{ github.workspace }}/e-k8s/k8s.mak
+
+          # select the k8s containers
+          cp ${{ github.workspace }}/e-k8s/db/Dockerfile.k ${{ github.workspace }}/e-k8s/db/Dockerfile
+          cp ${{ github.workspace }}/e-k8s/s1/Dockerfile.k ${{ github.workspace }}/e-k8s/s1/Dockerfile
+          cp ${{ github.workspace }}/e-k8s/s1/appk.py ${{ github.workspace }}/e-k8s/s1/app.py
+          cp ${{ github.workspace }}/e-k8s/s2/Dockerfile.k ${{ github.workspace }}/e-k8s/s2/Dockerfile
+          cp ${{ github.workspace }}/e-k8s/s2/appk.py ${{ github.workspace }}/e-k8s/s2/app.py
+
+          # setup the image repository
+          sed 's/\<YOURNAME\>/${{ secrets.DOCKERHUB_USERNAME }}/' ${{ github.workspace }}/e-k8s/s1/s1.yaml > ${{ github.workspace }}/e-k8s/s1/s11.yaml
+          sed 's/\<YOURNAME\>/${{ secrets.DOCKERHUB_USERNAME }}/' ${{ github.workspace }}/e-k8s/s2/s2.yaml > ${{ github.workspace }}/e-k8s/s2/s21.yaml
+          sed 's/\<YOURNAME\>/${{ secrets.DOCKERHUB_USERNAME }}/' ${{ github.workspace }}/e-k8s/db/db-tpl.yaml > ${{ github.workspace }}/e-k8s/db/db1.yaml
+          rm ${{ github.workspace }}/e-k8s/s1/s1.yaml ${{ github.workspace }}/e-k8s/s2/s2.yaml
+          mv ${{ github.workspace }}/e-k8s/s1/s11.yaml ${{ github.workspace }}/e-k8s/s1/s1.yaml
+          mv ${{ github.workspace }}/e-k8s/s2/s21.yaml ${{ github.workspace }}/e-k8s/s2/s2.yaml
+
+          # switch to us-west-2 for a standard AWS account; also remove the unneeded session token
+          sed 's/us-east-1/us-west-2/' ${{ github.workspace }}/e-k8s/db/db1.yaml > ${{ github.workspace }}/e-k8s/db/db2.yaml
+          sed 's/AWS_ACCESS_KEY_ID/${{ secrets.AWS_ACCESS_KEY_ID }}/' ${{ github.workspace }}/e-k8s/db/db2.yaml > ${{ github.workspace }}/e-k8s/db/db3.yaml
+          sed 's/AWS_SECRET_ACCESS_KEY/${{ secrets.AWS_SECRET_ACCESS_KEY }}/' ${{ github.workspace }}/e-k8s/db/db3.yaml > ${{ github.workspace }}/e-k8s/db/db4.yaml
+          sed 's/AWS_SESSION_TOKEN: your-session-token//' ${{ github.workspace }}/e-k8s/db/db4.yaml > ${{ github.workspace }}/e-k8s/db/dbf.yaml
+          rm ${{ github.workspace }}/e-k8s/db/db[1234].yaml
+          mv ${{ github.workspace }}/e-k8s/db/dbf.yaml ${{ github.workspace }}/e-k8s/db/db.yaml
+
+      -
+        uses: mr-smithers-excellent/docker-build-push@v4
+        name: Build & push db image
+        with:
+          image: ${{ secrets.DOCKERHUB_USERNAME }}/cmpt756db
+          tag: latest
+          registry: docker.io
+          dockerfile: ./e-k8s/db/Dockerfile
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          directory: e-k8s/db
+      -
+        uses: mr-smithers-excellent/docker-build-push@v4
+        name: Build & push s1 image
+        with:
+          image: ${{ secrets.DOCKERHUB_USERNAME }}/cmpt756s1
+          tag: latest
+          registry: docker.io
+          dockerfile: ./e-k8s/s1/Dockerfile
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          directory: e-k8s/s1
+      -
+        uses: mr-smithers-excellent/docker-build-push@v4
+        name: Build & push s2 image
+        with:
+          image: ${{ secrets.DOCKERHUB_USERNAME }}/cmpt756s2
+          tag: latest
+          registry: docker.io
+          dockerfile: ./e-k8s/s2/Dockerfile
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          directory: e-k8s/s2
