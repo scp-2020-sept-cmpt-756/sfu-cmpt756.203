@@ -28,7 +28,9 @@ jobs:
           # select the k8s containers
           cp ${{ github.workspace }}/e-k8s/db/Dockerfile.k ${{ github.workspace }}/e-k8s/db/Dockerfile
           cp ${{ github.workspace }}/e-k8s/s1/Dockerfile.k ${{ github.workspace }}/e-k8s/s1/Dockerfile
+          cp ${{ github.workspace }}/e-k8s/s1/appk.py ${{ github.workspace }}/e-k8s/s1/app.py
           cp ${{ github.workspace }}/e-k8s/s2/Dockerfile.k ${{ github.workspace }}/e-k8s/s2/Dockerfile
+          cp ${{ github.workspace }}/e-k8s/s2/appk.py ${{ github.workspace }}/e-k8s/s2/app.py
 
           # setup the image repository
           sed 's/\<YOURNAME\>/${{ secrets.DOCKERHUB_USERNAME }}/' ${{ github.workspace }}/e-k8s/s1/s1.yaml > ${{ github.workspace }}/e-k8s/s1/s11.yaml
