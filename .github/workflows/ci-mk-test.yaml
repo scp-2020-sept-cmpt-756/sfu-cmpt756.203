@@ -56,9 +56,13 @@ jobs:
           github token: ${{ secrets.GITHUB_TOKEN }}
       - name: Install istioctl
         run: |
+          pwd
           cd ~
+          pwd
           curl -sL https://istio.io/downloadIstioctl | sh -
+          echo $PATH
           export PATH=$PATH:$HOME/.istioctl/bin
+          pwd
       - name: Deploy s1
         run: |
           cd ${{ github.workspace }}/e-k8s
