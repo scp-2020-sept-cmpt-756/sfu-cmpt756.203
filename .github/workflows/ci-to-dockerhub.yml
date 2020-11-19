@@ -15,12 +15,6 @@ jobs:
         name: Checkout
         uses: actions/checkout@v2
       -
-        name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      -
         name: instantiate all the templatized files and sub in secrets 
         run: |
           sed 's/your-DockerHub-id/${{ secrets.DOCKERHUB_USERNAME }}/' ${{ github.workspace }}/e-k8s/k8s-tpl.mak > ${{ github.workspace }}/e-k8s/k8s.mak
@@ -49,16 +43,20 @@ jobs:
           mv ${{ github.workspace }}/e-k8s/db/dbf.yaml ${{ github.workspace }}/e-k8s/db/db.yaml
 
       -
-        uses: mr-smithers-excellent/docker-build-push@v4
-        name: Build & push db image
+        name: Login to DockerHub
+        uses: docker/login-action@v1
         with:
-          image: ${{ secrets.DOCKERHUB_USERNAME }}/cmpt756db
-          tag: latest
-          registry: docker.io
-          dockerfile: ./e-k8s/db/Dockerfile
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-          directory: e-k8s/db
+      -
+        name: Build and push db image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./e-k8s/db/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/cmpt756db:latest
       -
         uses: mr-smithers-excellent/docker-build-push@v4
         name: Build & push s1 image
