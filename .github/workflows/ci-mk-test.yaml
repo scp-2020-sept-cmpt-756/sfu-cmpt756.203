@@ -70,8 +70,7 @@ jobs:
 
           make -f mk.mak reinstate
           kubectl -n cmpt756e4 apply -f s1/s1.yaml
-          kubectl get nodes
-          make -f api.mak ls
+          make -f k8s.mak ls
           make -f api.mak cuser
           
           
