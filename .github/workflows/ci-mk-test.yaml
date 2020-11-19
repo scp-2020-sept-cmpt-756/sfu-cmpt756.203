@@ -24,7 +24,7 @@ jobs:
         name: instantiate all the templatized files and sub in secrets 
         run: |
           pushd ${{ github.workspace }}
-          sed 's/your-DockerHub-id/${{ secrets.DOCKERHUBID }}/' k8s-tpl.mak > k8s.mak
+          sed 's/your-DockerHub-id/${{ secrets.DOCKERHUB_USERNAME }}/' k8s-tpl.mak > k8s.mak
 
           # select the k8s containers
           cp db/Dockerfile.k db/Dockerfile
@@ -50,32 +50,32 @@ jobs:
         uses: mr-smithers-excellent/docker-build-push@v4
         name: Build & push Docker image
         with:
-          image: ${{ secrets.DOCKERHUBID }}/cmpt756db
+          image: ${{ secrets.DOCKERHUB_USERNAME }}/cmpt756db
           tag: latest
           registry: docker.io
           dockerfile: ./db/Dockerfile
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
           directory: db
       -
         uses: mr-smithers-excellent/docker-build-push@v4
         name: Build & push Docker image
         with:
-          image: ${{ secrets.DOCKERHUBID }}/cmpt756s1
+          image: ${{ secrets.DOCKERHUB_USERNAME }}/cmpt756s1
           tag: latest
           registry: docker.io
           dockerfile: ./s1/Dockerfile
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
           directory: s1
       -
         uses: mr-smithers-excellent/docker-build-push@v4
         name: Build & push Docker image
         with:
-          image: ${{ secrets.DOCKERHUBID }}/cmpt756s2
+          image: ${{ secrets.DOCKERHUB_USERNAME }}/cmpt756s2
           tag: latest
           registry: docker.io
           dockerfile: ./s2/Dockerfile
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
           directory: s2
