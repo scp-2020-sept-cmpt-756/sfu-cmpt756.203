@@ -23,28 +23,25 @@ jobs:
       -
         name: instantiate all the templatized files and sub in secrets 
         run: |
-          pushd ${{ github.workspace }}
-          sed 's/your-DockerHub-id/${{ secrets.DOCKERHUB_USERNAME }}/' k8s-tpl.mak > k8s.mak
+          sed 's/your-DockerHub-id/${{ secrets.DOCKERHUB_USERNAME }}/' ${{ github.workspace }}/k8s-tpl.mak > ${{ github.workspace }}/k8s.mak
 
           # select the k8s containers
-          cp db/Dockerfile.k db/Dockerfile
-          cp s1/Dockerfile.k s1/Dockerfile
-          cp s2/Dockerfile.k s2/Dockerfile
+          cp ${{ github.workspace }}/db/Dockerfile.k ${{ github.workspace }}/db/Dockerfile
+          cp ${{ github.workspace }}/s1/Dockerfile.k ${{ github.workspace }}/s1/Dockerfile
+          cp ${{ github.workspace }}/s2/Dockerfile.k ${{ github.workspace }}/s2/Dockerfile
 
           # setup the image repository
-          sed 's/\<YOURNAME\>/${{ secrets.DOCKERHUB_USERNAME }}/' cluster/s1-tpl.yaml > cluster/s1.yaml
-          sed 's/\<YOURNAME\>/${{ secrets.DOCKERHUB_USERNAME }}/' cluster/s2-tpl.yaml > cluster/s2.yaml
-          sed 's/\<YOURNAME\>/${{ secrets.DOCKERHUB_USERNAME }}/' cluster/db-tpl.yaml > cluster/db1.yaml
+          sed 's/\<YOURNAME\>/${{ secrets.DOCKERHUB_USERNAME }}/' ${{ github.workspace }}/cluster/s1-tpl.yaml > ${{ github.workspace }}/cluster/s1.yaml
+          sed 's/\<YOURNAME\>/${{ secrets.DOCKERHUB_USERNAME }}/' ${{ github.workspace }}/cluster/s2-tpl.yaml > ${{ github.workspace }}/cluster/s2.yaml
+          sed 's/\<YOURNAME\>/${{ secrets.DOCKERHUB_USERNAME }}/' ${{ github.workspace }}/cluster/db-tpl.yaml > ${{ github.workspace }}/cluster/db1.yaml
 
           # switch to us-west-2 for a standard AWS account; also remove the unneeded session token
-          sed 's/us-east-1/us-west-2/' cluster/db1.yaml > cluster/db2.yaml
-          sed 's/AWS_ACCESS_KEY_ID/${{ secrets.AWS_ACCESS_KEY_ID }}/' cluster/db2.yaml > cluster/db3.yaml
-          sed 's/AWS_SECRET_ACCESS_KEY/${{ secrets.AWS_SECRET_ACCESS_KEY }}/' cluster/db3.yaml > cluster/db4.yaml
-          sed 's/AWS_SESSION_TOKEN: your-session-token//' cluster/db4.yaml > cluster/dbf.yaml
-          rm cluster/db[1234].yaml
-          mv cluster/dbf.yaml cluster/db.yaml
-
-          popd
+          sed 's/us-east-1/us-west-2/' ${{ github.workspace }}/cluster/db1.yaml > ${{ github.workspace }}/cluster/db2.yaml
+          sed 's/AWS_ACCESS_KEY_ID/${{ secrets.AWS_ACCESS_KEY_ID }}/' ${{ github.workspace }}/cluster/db2.yaml > ${{ github.workspace }}/cluster/db3.yaml
+          sed 's/AWS_SECRET_ACCESS_KEY/${{ secrets.AWS_SECRET_ACCESS_KEY }}/' ${{ github.workspace }}/cluster/db3.yaml > ${{ github.workspace }}/cluster/db4.yaml
+          sed 's/AWS_SESSION_TOKEN: your-session-token//' ${{ github.workspace }}/cluster/db4.yaml > ${{ github.workspace }}/cluster/dbf.yaml
+          rm ${{ github.workspace }}/cluster/db[1234].yaml
+          mv ${{ github.workspace }}/cluster/dbf.yaml ${{ github.workspace }}/cluster/db.yaml
 
       -
         uses: mr-smithers-excellent/docker-build-push@v4
