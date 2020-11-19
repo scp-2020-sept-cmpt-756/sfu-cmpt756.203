@@ -1,0 +1,81 @@
+name: CI for Minikube
+
+on:
+  workflow_dispatch:
+    branches: [ main ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+      -
+        name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        name: instantiate all the templatized files and sub in secrets 
+        run: |
+          pushd ${{ github.workspace }}
+          sed 's/your-DockerHub-id/${{ secrets.DOCKERHUBID }}/' k8s-tpl.mak > k8s.mak
+
+          # select the k8s containers
+          cp db/Dockerfile.k db/Dockerfile
+          cp s1/Dockerfile.k s1/Dockerfile
+          cp s2/Dockerfile.k s2/Dockerfile
+
+          # setup the image repository
+          sed 's/\<YOURNAME\>/${{ secrets.DOCKERHUBID }}/' cluster/s1-tpl.yaml > cluster/s1.yaml
+          sed 's/\<YOURNAME\>/${{ secrets.DOCKERHUBID }}/' cluster/s2-tpl.yaml > cluster/s2.yaml
+          sed 's/\<YOURNAME\>/${{ secrets.DOCKERHUBID }}/' cluster/db-tpl.yaml > cluster/db1.yaml
+
+          # switch to us-west-2 for a standard AWS account; also remove the unneeded session token
+          sed 's/us-east-1/us-west-2/' cluster/db1.yaml > cluster/db2.yaml
+          sed 's/AWS_ACCESS_KEY_ID/${{ secrets.AWS_ACCESS_KEY_ID }}/' cluster/db2.yaml > cluster/db3.yaml
+          sed 's/AWS_SECRET_ACCESS_KEY/${{ secrets.AWS_SECRET_ACCESS_KEY }}/' cluster/db3.yaml > cluster/db4.yaml
+          sed 's/AWS_SESSION_TOKEN: your-session-token//' cluster/db4.yaml > cluster/dbf.yaml
+          rm cluster/db[1234].yaml
+          mv cluster/dbf.yaml cluster/db.yaml
+
+          popd
+
+      -
+        uses: mr-smithers-excellent/docker-build-push@v4
+        name: Build & push Docker image
+        with:
+          image: ${{ secrets.DOCKERHUBID }}/cmpt756db
+          tag: latest
+          registry: docker.io
+          dockerfile: ./db/Dockerfile
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          directory: db
+      -
+        uses: mr-smithers-excellent/docker-build-push@v4
+        name: Build & push Docker image
+        with:
+          image: ${{ secrets.DOCKERHUBID }}/cmpt756s1
+          tag: latest
+          registry: docker.io
+          dockerfile: ./s1/Dockerfile
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          directory: s1
+      -
+        uses: mr-smithers-excellent/docker-build-push@v4
+        name: Build & push Docker image
+        with:
+          image: ${{ secrets.DOCKERHUBID }}/cmpt756s2
+          tag: latest
+          registry: docker.io
+          dockerfile: ./s2/Dockerfile
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          directory: s2
