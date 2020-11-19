@@ -4,7 +4,6 @@ WORKDIR /code
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-COPY config.json .
 COPY app.py .
 
 EXPOSE 30002

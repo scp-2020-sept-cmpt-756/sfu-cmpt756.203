@@ -1,4 +1,4 @@
-name: CI for Minikube
+name: CI up to DockerHub
 
 on:
   workflow_dispatch:
@@ -48,29 +48,36 @@ jobs:
           rm ${{ github.workspace }}/e-k8s/db/db[1234].yaml
           mv ${{ github.workspace }}/e-k8s/db/dbf.yaml ${{ github.workspace }}/e-k8s/db/db.yaml
 
-      - name: Setup Minikube
-        uses: manusa/actions-setup-minikube@v2.0.1
+      -
+        uses: mr-smithers-excellent/docker-build-push@v4
+        name: Build & push db image
         with:
-          minikube version: 'v1.13.1'
-          kubernetes version: 'v1.19.2'
-          github token: ${{ secrets.GITHUB_TOKEN }}
-            
-      - name: Install istioctl onto runner & install istio into Minikube
-        run: |
-          cd ~
-          curl -sL https://istio.io/downloadIstioctl | sh -
-          ls -l $HOME/.istioctl/bin
-          export PATH=$PATH:$HOME/.istioctl/bin
-          $HOME/.istioctl/bin/istioctl install --set profile=demo
-
-      - name: Deploy s1
-        run: |
-          cd ${{ github.workspace }}/e-k8s
-          
-
-          make -f mk.mak reinstate
-          kubectl -n cmpt756e4 apply -f s1/s1.yaml
-          make -f k8s.mak ls
-          make -f api.mak cuser
-          
-          
+          image: ${{ secrets.DOCKERHUB_USERNAME }}/cmpt756db
+          tag: latest
+          registry: docker.io
+          dockerfile: ./e-k8s/db/Dockerfile
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          directory: e-k8s/db
+      -
+        uses: mr-smithers-excellent/docker-build-push@v4
+        name: Build & push s1 image
+        with:
+          image: ${{ secrets.DOCKERHUB_USERNAME }}/cmpt756s1
+          tag: latest
+          registry: docker.io
+          dockerfile: ./e-k8s/s1/Dockerfile
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          directory: e-k8s/s1
+      -
+        uses: mr-smithers-excellent/docker-build-push@v4
+        name: Build & push s2 image
+        with:
+          image: ${{ secrets.DOCKERHUB_USERNAME }}/cmpt756s2
+          tag: latest
+          registry: docker.io
+          dockerfile: ./e-k8s/s2/Dockerfile
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          directory: e-k8s/s2
