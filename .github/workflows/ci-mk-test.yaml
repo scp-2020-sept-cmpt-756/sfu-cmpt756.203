@@ -23,25 +23,25 @@ jobs:
       -
         name: instantiate all the templatized files and sub in secrets 
         run: |
-          sed 's/your-DockerHub-id/${{ secrets.DOCKERHUB_USERNAME }}/' ${{ github.workspace }}/k8s-tpl.mak > ${{ github.workspace }}/k8s.mak
+          sed 's/your-DockerHub-id/${{ secrets.DOCKERHUB_USERNAME }}/' ${{ github.workspace }}/e-k8s/k8s-tpl.mak > ${{ github.workspace }}/e-k8s/k8s.mak
 
           # select the k8s containers
-          cp ${{ github.workspace }}/db/Dockerfile.k ${{ github.workspace }}/db/Dockerfile
-          cp ${{ github.workspace }}/s1/Dockerfile.k ${{ github.workspace }}/s1/Dockerfile
-          cp ${{ github.workspace }}/s2/Dockerfile.k ${{ github.workspace }}/s2/Dockerfile
+          cp ${{ github.workspace }}/e-k8s/db/Dockerfile.k ${{ github.workspace }}/e-k8s/db/Dockerfile
+          cp ${{ github.workspace }}/e-k8s/s1/Dockerfile.k ${{ github.workspace }}/e-k8s/s1/Dockerfile
+          cp ${{ github.workspace }}/e-k8s/s2/Dockerfile.k ${{ github.workspace }}/e-k8s/s2/Dockerfile
 
           # setup the image repository
-          sed 's/\<YOURNAME\>/${{ secrets.DOCKERHUB_USERNAME }}/' ${{ github.workspace }}/cluster/s1-tpl.yaml > ${{ github.workspace }}/cluster/s1.yaml
-          sed 's/\<YOURNAME\>/${{ secrets.DOCKERHUB_USERNAME }}/' ${{ github.workspace }}/cluster/s2-tpl.yaml > ${{ github.workspace }}/cluster/s2.yaml
-          sed 's/\<YOURNAME\>/${{ secrets.DOCKERHUB_USERNAME }}/' ${{ github.workspace }}/cluster/db-tpl.yaml > ${{ github.workspace }}/cluster/db1.yaml
+          sed 's/\<YOURNAME\>/${{ secrets.DOCKERHUB_USERNAME }}/' ${{ github.workspace }}/e-k8s/cluster/s1-tpl.yaml > ${{ github.workspace }}/e-k8s/cluster/s1.yaml
+          sed 's/\<YOURNAME\>/${{ secrets.DOCKERHUB_USERNAME }}/' ${{ github.workspace }}/e-k8s/cluster/s2-tpl.yaml > ${{ github.workspace }}/e-k8s/cluster/s2.yaml
+          sed 's/\<YOURNAME\>/${{ secrets.DOCKERHUB_USERNAME }}/' ${{ github.workspace }}/e-k8s/cluster/db-tpl.yaml > ${{ github.workspace }}/e-k8s/cluster/db1.yaml
 
           # switch to us-west-2 for a standard AWS account; also remove the unneeded session token
-          sed 's/us-east-1/us-west-2/' ${{ github.workspace }}/cluster/db1.yaml > ${{ github.workspace }}/cluster/db2.yaml
-          sed 's/AWS_ACCESS_KEY_ID/${{ secrets.AWS_ACCESS_KEY_ID }}/' ${{ github.workspace }}/cluster/db2.yaml > ${{ github.workspace }}/cluster/db3.yaml
-          sed 's/AWS_SECRET_ACCESS_KEY/${{ secrets.AWS_SECRET_ACCESS_KEY }}/' ${{ github.workspace }}/cluster/db3.yaml > ${{ github.workspace }}/cluster/db4.yaml
-          sed 's/AWS_SESSION_TOKEN: your-session-token//' ${{ github.workspace }}/cluster/db4.yaml > ${{ github.workspace }}/cluster/dbf.yaml
-          rm ${{ github.workspace }}/cluster/db[1234].yaml
-          mv ${{ github.workspace }}/cluster/dbf.yaml ${{ github.workspace }}/cluster/db.yaml
+          sed 's/us-east-1/us-west-2/' ${{ github.workspace }}/e-k8s/cluster/db1.yaml > ${{ github.workspace }}/e-k8s/cluster/db2.yaml
+          sed 's/AWS_ACCESS_KEY_ID/${{ secrets.AWS_ACCESS_KEY_ID }}/' ${{ github.workspace }}/e-k8s/cluster/db2.yaml > ${{ github.workspace }}/e-k8s/cluster/db3.yaml
+          sed 's/AWS_SECRET_ACCESS_KEY/${{ secrets.AWS_SECRET_ACCESS_KEY }}/' ${{ github.workspace }}/e-k8s/cluster/db3.yaml > ${{ github.workspace }}/e-k8s/cluster/db4.yaml
+          sed 's/AWS_SESSION_TOKEN: your-session-token//' ${{ github.workspace }}/e-k8s/cluster/db4.yaml > ${{ github.workspace }}/e-k8s/cluster/dbf.yaml
+          rm ${{ github.workspace }}/e-k8s/cluster/db[1234].yaml
+          mv ${{ github.workspace }}/e-k8s/cluster/dbf.yaml ${{ github.workspace }}/e-k8s/cluster/db.yaml
 
       -
         uses: mr-smithers-excellent/docker-build-push@v4
@@ -50,10 +50,10 @@ jobs:
           image: ${{ secrets.DOCKERHUB_USERNAME }}/cmpt756db
           tag: latest
           registry: docker.io
-          dockerfile: ./db/Dockerfile
+          dockerfile: ./e-k8s/db/Dockerfile
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-          directory: db
+          directory: e-k8s/db
       -
         uses: mr-smithers-excellent/docker-build-push@v4
         name: Build & push Docker image
@@ -61,10 +61,10 @@ jobs:
           image: ${{ secrets.DOCKERHUB_USERNAME }}/cmpt756s1
           tag: latest
           registry: docker.io
-          dockerfile: ./s1/Dockerfile
+          dockerfile: ./e-k8s/s1/Dockerfile
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-          directory: s1
+          directory: e-k8s/s1
       -
         uses: mr-smithers-excellent/docker-build-push@v4
         name: Build & push Docker image
@@ -72,7 +72,7 @@ jobs:
           image: ${{ secrets.DOCKERHUB_USERNAME }}/cmpt756s2
           tag: latest
           registry: docker.io
-          dockerfile: ./s2/Dockerfile
+          dockerfile: ./e-k8s/s2/Dockerfile
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-          directory: s2
+          directory: e-k8s/s2
