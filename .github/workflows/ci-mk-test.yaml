@@ -60,8 +60,11 @@ jobs:
           cd ~
           pwd
           curl -sL https://istio.io/downloadIstioctl | sh -
+          ls -l ~/.istioctl/bin
+          ls -l $HOME/.istioctl/bin
           echo $PATH
           export PATH=$PATH:$HOME/.istioctl/bin
+          echo $PATH
           pwd
       - name: Deploy s1
         run: |
