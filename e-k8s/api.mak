@@ -36,7 +36,7 @@ logs:
 #IGW=172.16.199.128:31413
 #IGW=10.96.57.211:80
 #IGW=a344add95f74b453684bcd29d1461240-517644147.us-east-1.elb.amazonaws.com:80
-IGW= 20.151.89.30:80
+IGW=localhost:80
 
 # stock body & fragment for API requests
 BODY_USER= { \
