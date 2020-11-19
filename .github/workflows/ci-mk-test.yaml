@@ -33,7 +33,7 @@ jobs:
           # setup the image repository
           sed 's/\<YOURNAME\>/${{ secrets.DOCKERHUB_USERNAME }}/' ${{ github.workspace }}/e-k8s/s1/s1.yaml > ${{ github.workspace }}/e-k8s/s1/s11.yaml
           sed 's/\<YOURNAME\>/${{ secrets.DOCKERHUB_USERNAME }}/' ${{ github.workspace }}/e-k8s/s2/s2.yaml > ${{ github.workspace }}/e-k8s/s2/s21.yaml
-          sed 's/\<YOURNAME\>/${{ secrets.DOCKERHUB_USERNAME }}/' ${{ github.workspace }}/e-k8s/db/db.yaml > ${{ github.workspace }}/e-k8s/db/db1.yaml
+          sed 's/\<YOURNAME\>/${{ secrets.DOCKERHUB_USERNAME }}/' ${{ github.workspace }}/e-k8s/db/db-tpl.yaml > ${{ github.workspace }}/e-k8s/db/db1.yaml
           rm ${{ github.workspace }}/e-k8s/s1/s1.yaml ${{ github.workspace }}/e-k8s/s2/s2.yaml
           mv ${{ github.workspace }}/e-k8s/s1/s11.yaml ${{ github.workspace }}/e-k8s/s1/s1.yaml
           mv ${{ github.workspace }}/e-k8s/s2/s21.yaml ${{ github.workspace }}/e-k8s/s2/s2.yaml
