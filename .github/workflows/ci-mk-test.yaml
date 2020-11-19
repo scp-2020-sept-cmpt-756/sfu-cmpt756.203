@@ -66,11 +66,19 @@ jobs:
       - name: Deploy s1
         run: |
           cd ${{ github.workspace }}/e-k8s
-          
-
           make -f mk.mak reinstate
           kubectl -n cmpt756e4 apply -f s1/s1.yaml
+          
+          
+      - name: Sleep for 120 seconds
+        uses: jakejarvis/wait-action@master
+        with:
+          time: '180s'
+      
+      - name: Hope the cluster is up and useable
+        run: |
+          cd ${{ github.workspace }}/e-k8s
           make -f k8s.mak ls
           make -f api.mak cuser
-          
-          
+
+      
