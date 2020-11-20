@@ -30,12 +30,12 @@ session_token = os.getenv('AWS_SESSION_TOKEN')
 
 # if session_token is not present in the environment, assume it is a 
 # standard acct which doesn't need one; otherwise, add it on.
-if ( not session_token )
+if ( not session_token ):
   dynamodb = boto3.resource('dynamodb', 
                       region_name=region,
                       aws_access_key_id=access_key,
                       aws_secret_access_key=secret_access_key)
-else
+else:
   dynamodb = boto3.resource('dynamodb', 
                       region_name=region,
                       aws_access_key_id=access_key,
