@@ -45,7 +45,9 @@ uninstall-prom:
 
 install-kiali:
 	echo $(HELM) install --namespace $(TARGNS) --set auth.strategy="anonymous" --repo https://kiali.org/helm-charts kiali-server kiali-server > obs-kiali.log
-	$(HELM) install --namespace $(TARGNS) --set auth.strategy="anonymous" --repo https://kiali.org/helm-charts kiali-server kiali-server | tee -a obs-kiali.log
+	#$(HELM) install --namespace $(TARGNS) --set auth.strategy="anonymous" --repo https://kiali.org/helm-charts kiali-server kiali-server | tee -a obs-kiali.log
+	$(KC) create namespace kiali-operator
+	$(HELM) install --set cr.create=true --set cr.namespace=istio-system --namespace kiali-operator --repo https://kiali.org/helm-charts kiali-operator kiali-operator
 
 uninstall-kiali:
 	echo $(HELM) uninstall kiali-server --namespace $(TARGNS) > obs-uninstall-kiali.log

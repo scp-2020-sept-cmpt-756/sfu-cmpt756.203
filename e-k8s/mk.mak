@@ -28,12 +28,12 @@ CTX=minikube
 DRIVER=virtualbox
 
 # developed and tested again 1.19.2
-KVER=1.19.2
+KVER=1.19.4
 
 # output: mk-cluster.log
 start:
-	echo $(MK) start --kubernetes-version='$(KVER)' driver=$(DRIVER)> tee mk-cluster.log
-	$(MK) start --kubernetes-version='$(KVER)' driver=$(DRIVER)| tee -a mk-cluster.log
+	echo $(MK) start --kubernetes-version='$(KVER)' driver=$(DRIVER) | tee mk-cluster.log
+	$(MK) start --kubernetes-version='$(KVER)' driver=$(DRIVER) | tee -a mk-cluster.log
 
 stop: showcontext
 	$(MK) stop | tee mk-stop.log
