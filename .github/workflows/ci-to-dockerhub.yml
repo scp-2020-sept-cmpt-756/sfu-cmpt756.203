@@ -15,12 +15,6 @@ jobs:
         name: Checkout
         uses: actions/checkout@v2
       -
-        name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      -
         name: instantiate all the templatized files and sub in secrets 
         run: |
           sed 's/your-DockerHub-id/${{ secrets.DOCKERHUB_USERNAME }}/' ${{ github.workspace }}/e-k8s/k8s-tpl.mak > ${{ github.workspace }}/e-k8s/k8s.mak
@@ -48,6 +42,12 @@ jobs:
           rm ${{ github.workspace }}/e-k8s/db/db[1234].yaml
           mv ${{ github.workspace }}/e-k8s/db/dbf.yaml ${{ github.workspace }}/e-k8s/db/db.yaml
 
+      -
+        name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       -
         uses: mr-smithers-excellent/docker-build-push@v4
         name: Build & push db image
