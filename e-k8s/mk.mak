@@ -27,12 +27,12 @@ CLUSTER=minikube
 CTX=minikube
 DRIVER=virtualbox
 
-# developed and tested again 1.19.2
+# developed and tested against 1.19.2
 KVER=1.19.2
 
 # output: mk-cluster.log
 start:
-	echo $(MK) start --kubernetes-version='$(KVER)' driver=$(DRIVER)> tee mk-cluster.log
+	echo $(MK) start --kubernetes-version='$(KVER)' driver=$(DRIVER) > mk-cluster.log
 	$(MK) start --kubernetes-version='$(KVER)' driver=$(DRIVER)| tee -a mk-cluster.log
 
 stop: showcontext
@@ -49,7 +49,7 @@ status: showcontext
 dashboard:
 	$(MK) dashboard
 
-# show svc inside istsio's ingressgateway
+# show svc inside istio's ingressgateway
 extern: showcontext
 	$(KC) -n istio-system get svc istio-ingressgateway
 

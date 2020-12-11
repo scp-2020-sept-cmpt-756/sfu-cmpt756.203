@@ -27,25 +27,17 @@ NS=cmpt756e4
 deploy: gw s1 s2 db
 	$(KC) get gw,deploy,svc,pods
 
-gw: gw.svc.log
+gw: cluster/service-gateway.yaml
+	$(KC) -n $(NS) apply -f cluster/service-gateway.yaml > gw.log
 
-s1: s1.svc.log
+s1: cluster/s1.yaml
+	$(KC) -n $(NS) apply -f cluster/s1.yaml > s1.log
 
-s2: s2.svc.log
+s2: cluster/s2.yaml
+	$(KC) -n $(NS) apply -f cluster/s2.yaml > s2.log
 
-db: db.svc.log
-
-gw.svc.log:
-	$(KC) -n $(NS) apply -f cluster/service-gateway.yaml | tee gw.svc.log
-
-s1.svc.log:
-	$(KC) -n $(NS) apply -f cluster/s1.yaml | tee s1.svc.log
-
-s2.svc.log:
-	$(KC) -n $(NS) apply -f cluster/s2.yaml | tee s2.svc.log
-
-db.svc.log:
-	$(KC) -n $(NS) apply -f cluster/db.yaml | tee db.svc.log
+db: cluster/db.yaml
+	$(KC) -n $(NS) apply -f cluster/db.yaml > db.log
 
 scratch:
 	$(KC) delete deploy cmpt756s1 cmpt756s2 cmpt756db
@@ -73,34 +65,15 @@ ls: showcontext
 lsd:
 	$(KC) get pods --all-namespaces -o=jsonpath='{range .items[*]}{"\n"}{.metadata.name}{":\t"}{range .spec.containers[*]}{.image}{", "}{end}{end}' | sort
 
+cr:
+	$(DK) push $(CREG)/$(REGID)/cmpt756s1:latest | tee s1.repo.log
+	$(DK) push $(CREG)/$(REGID)/cmpt756s2:latest | tee s2.repo.log
+	$(DK) push $(CREG)/$(REGID)/cmpt756db:latest | tee db.repo.log
 
-#
-# the s1 service
-#
-s1.repo.log: s1.img.log
-	$(DK) push $(REGID)/cmpt756s1:latest | tee s1.repo.log
-
-s1.img.log: e-aws/s1/Dockerfile e-aws/s1/app.py
-	$(DK) build -t $(REGID)/cmpt756s1:latest e-aws/s1 | tee s1.img.log
-
-#
-# the s2 service
-#
-s2.repo.log: s2.img.log
-	$(DK) push $(REGID)/cmpt756s2:latest | tee s2.repo.log
-
-s2.img.log: e-aws/s2/Dockerfile e-aws/s2/app.py
-	$(DK) build -t $(REGID)/cmpt756s2:latest e-aws/s2 | tee s2.img.log
-
-#
-# the db service
-#
-db.repo.log: db.img.log
-	$(DK) push $(REGID)/cmpt756db:latest | tee db.repo.log
-
-db.img.log: e-aws/db/Dockerfile e-aws/db/app.py
-	$(DK) build -t $(REGID)/cmpt756db:latest e-aws/db | tee db.img.log
-
+image: s1/Dockerfile s2/Dockerfile db/Dockerfile db/app.py
+	$(DK) build -t $(CREG)/$(REGID)/cmpt756s1:latest s1 | tee s1.img.log
+	$(DK) build -t $(CREG)/$(REGID)/cmpt756s2:latest s2 | tee s2.img.log
+	$(DK) build -t $(CREG)/$(REGID)/cmpt756db:latest db | tee db.img.log
 
 # reminder of current context
 showcontext:

@@ -1,0 +1,16 @@
+#
+# SFU CMPT 756.211
+#
+# This manifest is used to push your AWS credentials via k8s secret into
+# your cluster for consumption by the db service.
+#
+apiVersion: v1
+kind: Secret
+metadata:
+  name: awscred
+type: Opaque
+stringData:
+  AWS_REGION: us-east-1
+  AWS_ACCESS_KEY_ID: your-access-key
+  AWS_SECRET_ACCESS_KEY: your-secret-access-key
+  AWS_SESSION_TOKEN: your-session-token
