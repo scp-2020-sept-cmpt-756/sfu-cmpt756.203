@@ -13,6 +13,12 @@
 # 2. Deployment's .spec.template.spec.containers.livenessProbe & readinessProbe
 #    can be removed to clean up the logs
 #
+# This script is set up for Github's newly announced (and still beta) container
+# registry to side-step DockerHub's throttling of their free accounts.
+# If you wish to switch back to DockerHub, replace ghcr.io with docker.io
+#
+# TODO: You must fill in your container registry id (ZZ-REG-ID)
+#
 apiVersion: v1
 kind: Service
 metadata:
