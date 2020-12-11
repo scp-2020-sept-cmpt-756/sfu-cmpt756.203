@@ -6,71 +6,86 @@
 #   1 Service - this opens up the logic
 #   1 Service Account - this enable access control
 #
-# Notes:
+# Notable observations:
 #
 # 1. the Service's .spec.ports[0] need to matches the Deployment's
 #    .spec.template.spec.containers[0].ports
 # 2. Deployment's .spec.template.spec.containers.livenessProbe & readinessProbe
 #    can be removed to clean up the logs
+# 3. You must supply your AWS specifics in the secret resource
 #
 apiVersion: v1
 kind: Service
 metadata:
-  name: cmpt756s1
+  name: cmpt756db
   labels:
-    app: cmpt756s1
+    app: cmpt756db
 spec:
   ports:
-  - port: 30000
+  - port: 30002
     name: http
   selector:
-    app: cmpt756s1
+    app: cmpt756db
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: awscred
+type: Opaque
+stringData:
+  AWS_REGION: us-east-1
+  AWS_ACCESS_KEY_ID: your-access-key
+  AWS_SECRET_ACCESS_KEY: your-secret-access-key
+  AWS_SESSION_TOKEN: your-session-token
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: svc-s1
+  name: svc-db
   labels:
-    account: SVC_S1
+    account: SVC_DB
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cmpt756s1
+  name: cmpt756db
   labels:
-    app: cmpt756s1
+    app: cmpt756db
     version: v1
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: cmpt756s1
+      app: cmpt756db
       version: v1
   template:
     metadata:
-      name: service1-pod
+      name: database-pod
       labels:
-        app: cmpt756s1
+        app: cmpt756db
         version: v1
     spec:
-      serviceAccountName: svc-s1
+      serviceAccountName: svc-db
       containers:
-      - name: service1
-        image: docker.io/<YOURNAME>/cmpt756s1:latest
+      - name: cmpt756db
+        image: ghcr.io/ZZ-REG-ID/cmpt756db:latest
         imagePullPolicy: Always
+        envFrom:
+        - secretRef:
+            name: awscred
         ports:
-        - containerPort: 30000
+        - containerPort: 30002
         livenessProbe:
           httpGet:
-            path: /api/v1/user/health
-            port: 30000
+            path: /api/v1/datastore/health
+            port: 30002
           initialDelaySeconds: 10
           periodSeconds: 5
           failureThreshold: 5
         readinessProbe:
           httpGet:
-            path: /api/v1/user/readiness
-            port: 30000
+            path: /api/v1/datastore/readiness
+            port: 30002
           initialDelaySeconds: 10
           periodSeconds: 5
           timeoutSeconds: 2
