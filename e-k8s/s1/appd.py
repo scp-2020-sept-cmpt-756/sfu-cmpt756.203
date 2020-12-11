@@ -12,7 +12,7 @@ from flask import Blueprint
 app = Flask(__name__)
 bp = Blueprint('app', __name__)
 db = {
-    "name": "http://host.docker.internal:5002/api/v1/datastore",
+    "name": "http://host.docker.internal:30002/api/v1/datastore",
     "endpoint": [
         "read",
         "write",
@@ -44,7 +44,7 @@ def update_user(user_id):
         email = content['email']
         fname = content['fname']
         lname = content['lname']
-    except: 
+    except:
         return json.dumps({"message": "error reading arguments"})
     url = db['name'] + '/' + db['endpoint'][3]
     response = requests.put(url, params = {"objtype": "user", "objkey": user_id}, json = {"email": email, "fname": fname, "lname": lname})
@@ -58,7 +58,7 @@ def create_user():
         lname = content['lname']
         email = content['email']
         fname = content['fname']
-    except: 
+    except:
         return json.dumps({"message": "error reading arguments"})
     url = db['name'] + '/' + db['endpoint'][1]
     response = requests.post(url, json = {"objtype":"user","lname":lname, "email": email, "fname": fname})
@@ -88,7 +88,7 @@ def get_user(user_id):
 
 @bp.route('/login', methods=['PUT'])
 def login():
-    try: 
+    try:
         content = request.get_json()
         uid = content['uid']
     except:
@@ -102,7 +102,7 @@ def login():
 
 @bp.route('/logoff', methods=['PUT'])
 def logoff():
-    try: 
+    try:
         content = request.get_json()
         jwt = content['jwt']
     except:

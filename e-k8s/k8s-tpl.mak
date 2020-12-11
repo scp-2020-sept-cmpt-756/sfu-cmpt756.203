@@ -1,4 +1,4 @@
-#
+
 # Janky front-end to bring some sanity (?) to the litany of tools and switches
 # for working with a k8s cluster. Note that this file exercise core k8s
 # commands that's independent of where/how you cluster live.
@@ -13,8 +13,9 @@
 #
 
 
-# specify yor DockerHub id here
-REGID=your-DockerHub-id
+# specify yor container registry & registry id here
+CREG=ghcr.io
+REGID=ZZ-REG-ID
 
 KC=kubectl
 DK=docker
@@ -35,22 +36,23 @@ s2: s2.svc.log
 db: db.svc.log
 
 gw.svc.log:
-	$(KC) -n $(NS) apply -f misc/service-gateway.yaml | tee gw.svc.log
+	$(KC) -n $(NS) apply -f cluster/service-gateway.yaml | tee gw.svc.log
 
 s1.svc.log:
-	$(KC) -n $(NS) apply -f s1/s1.yaml | tee s1.svc.log
+	$(KC) -n $(NS) apply -f cluster/s1.yaml | tee s1.svc.log
 
 s2.svc.log:
-	$(KC) -n $(NS) apply -f s2/s2.yaml | tee s2.svc.log
+	$(KC) -n $(NS) apply -f cluster/s2.yaml | tee s2.svc.log
 
 db.svc.log:
-	$(KC) -n $(NS) apply -f db/db.yaml | tee db.svc.log
+	$(KC) -n $(NS) apply -f cluster/db.yaml | tee db.svc.log
 
 scratch:
 	$(KC) delete deploy cmpt756s1 cmpt756s2 cmpt756db
 	$(KC) delete svc cmpt756s1 cmpt756s2 cmpt756db
 	$(KC) delete gw my-gateway
 	$(KC) get gw,deploy,svc,pods
+	rm *.log
 
 clean:
 	rm {s1,s2,db}.{img,repo,svc}.log gw.svc.log
@@ -70,16 +72,6 @@ ls: showcontext
 # show containers across all pods
 lsd:
 	$(KC) get pods --all-namespaces -o=jsonpath='{range .items[*]}{"\n"}{.metadata.name}{":\t"}{range .spec.containers[*]}{.image}{", "}{end}{end}' | sort
-
-
-# handy bits for the container images... not necessary
-
-image: showcontext
-	$(DK) image ls | tee __header | grep overcoil > __content
-	head -n 1 __header
-	cat __content
-	rm __content __header
-
 
 
 #

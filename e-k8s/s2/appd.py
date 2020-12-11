@@ -10,7 +10,7 @@ from flask import Blueprint
 app = Flask(__name__)
 
 db = {
-    "name": "http://host.docker.internal:5002/api/v1/datastore",
+    "name": "http://host.docker.internal:30002/api/v1/datastore",
     "endpoint": [
         "read",
         "write",
@@ -56,7 +56,7 @@ def create_song():
         content = request.get_json()
         Artist = content['Artist']
         SongTitle = content['SongTitle']
-    except: 
+    except:
         return json.dumps({"message": "error reading arguments"})
     url = db['name'] + '/' + db['endpoint'][1]
     response = requests.post(url, json = {"objtype": "music", "Artist":Artist, "SongTitle": SongTitle}, headers = {'Authorization': headers['Authorization']})
