@@ -1,4 +1,4 @@
-FROM python:3.8-slim
+FROM quay.io/bitnami/python:3.8.6-prod-debian-10-r81
 
 WORKDIR /code
 
@@ -7,6 +7,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app.py .
 
-EXPOSE 5001
+EXPOSE 30001
 
-CMD ["python", "app.py", "5001"]
+CMD ["python", "app.py", "30001"]
