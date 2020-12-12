@@ -13,8 +13,8 @@
 #
 
 
-# specify yor DockerHub id here
-#REGID=your-DockerHub-id
+# specify yor GitHub id here
+#REGID=your-GitHub-id
 REGID=tedkirkpatrick
 
 KC=kubectl
@@ -40,14 +40,17 @@ db: db.svc.log
 gw.svc.log: misc/service-gateway.yaml
 	$(KC) -n $(NS) apply -f $< | tee $@
 
-s1.svc.log: s1/s1.yaml s1.repo.log
+s1.svc.log: s1/s1.yaml s1.repo.log s1/s1-sm.yaml
 	$(KC) -n $(NS) apply -f $< | tee $@
+	$(KC) -n $(NS) apply -f s1/s1-sm.yaml
 
-s2.svc.log: s2/s2.yaml s2.repo.log
+s2.svc.log: s2/s2.yaml s2.repo.log s2/s2-sm.yaml
 	$(KC) -n $(NS) apply -f $< | tee $@
+	$(KC) -n $(NS) apply -f s2/s2-sm.yaml
 
-db.svc.log: db/db.yaml db.repo.log
+db.svc.log: db/db.yaml db.repo.log db/db-sm.yaml
 	$(KC) -n $(NS) apply -f $< | tee $@
+	$(KC) -n $(NS) apply -f db/db-sm.yaml
 
 scratch:
 	$(KC) delete -n $(NS) deploy cmpt756s1 cmpt756s2 cmpt756db --ignore-not-found=true
@@ -86,19 +89,19 @@ image: showcontext
 #
 # the s1 service
 #
-s1.repo.log: s1/Dockerfile s1/app.py
+s1.repo.log: s1/Dockerfile s1/app.py s1/requirements.txt
 	make -f docker.mak $@
 
 #
 # the s2 service
 #
-s2.repo.log: s2/Dockerfile s2/app.py
+s2.repo.log: s2/Dockerfile s2/app.py s2/requirements.txt
 	make -f docker.mak $@
 
 #
 # the db service
 #
-db.repo.log: db/Dockerfile db/app.py
+db.repo.log: db/Dockerfile db/app.py db/requirements.txt
 	make -f docker.mak $@
 
 #
