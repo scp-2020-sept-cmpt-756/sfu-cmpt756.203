@@ -37,7 +37,7 @@ init-helm:
 # Grafana is included within this Prometheus package
 install-prom:
 	echo $(HELM) install komplete-prometheus --namespace $(TARGNS) prometheus-community/kube-prometheus-stack > obs-install-prometheus.log
-	$(HELM) install komplete-prometheus --namespace $(TARGNS) prometheus-community/kube-prometheus-stack | tee -a obs-install-prometheus.log
+	$(HELM) install komplete-prometheus -f helm-kube-stack-values.yaml --namespace $(TARGNS) prometheus-community/kube-prometheus-stack | tee -a obs-install-prometheus.log
 
 uninstall-prom:
 	echo $(HELM) uninstall komplete-prometheus --namespace $(TARGNS) > obs-uninstall-prometheus.log

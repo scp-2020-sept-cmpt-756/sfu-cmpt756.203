@@ -112,19 +112,7 @@ rerouting their traffic to run between Istio proxies.
 
 Istiod: [`pilot`](https://github.com/istio/istio/tree/master/pilot)
 
-## `kube-state-metrics`
-
-Service that returns Kubernetes metrics in Prometheus format. To
-directly query, first forwart the port
-
-~~~
-$ kubectl port-forward svc/komplete-prometheus-kube-state-metrics -n istio-system 8080
-~~~
-
-and then in the browser, enter `127.0.0.1:8080/metrics`
-
-This will return *many* metrics.  It is really only useful to test
-that the pod is correctly running.
+[Proxy (Extended version of Envoy)](https://github.com/istio/proxy)
 
 
 ## Starting a load balancer
@@ -198,3 +186,37 @@ Prometheus namespace as `istio-system`:
 ~~~
 $ kubectl apply -n istio-system -f sm-db.yaml
 ~~~
+
+[ServiceMonitor resource specification](https://docs.openshift.com/container-platform/4.4/rest_api/monitoring_apis/servicemonitor-monitoring-coreos-com-v1.html)
+
+## Docker Hub mitigations
+
+[Setting Istio to use Google Container Registry](https://istio.io/latest/blog/2020/docker-rate-limit/)
+
+## Scraping Prometheus data from the Python Flask applications
+
+The `debug=True` option to `app.run()` stops the Prometheus `/metrics` requests from
+being recognized.  No idea why.  On the other hand, the
+`threaded=True` option to `app.run()` and `BluePrint` view are
+compatible with Prometheus metrics.
+
+## Minikube pods and purposes
+
+Not running:
+[adapter Prometheus stats -> Kubernetes stats for input to HorizontalAutoscaler](https://github.com/DirectXMan12/k8s-prometheus-adapter)
+
+### `kube-state-metrics`
+
+Service that returns Kubernetes metrics in Prometheus format. To
+directly query, first forwart the port
+
+~~~
+$ kubectl port-forward svc/komplete-prometheus-kube-state-metrics -n istio-system 8080
+~~~
+
+and then in the browser, enter `127.0.0.1:8080/metrics`
+
+This will return *many* metrics.  It is really only useful to test
+that the pod is correctly running.
+
+[`kube-state-metrics` README and source code](https://github.com/kubernetes/kube-state-metrics)

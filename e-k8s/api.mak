@@ -63,7 +63,7 @@ BODY_TOKEN={ \
 
 # keep these ones around
 USER_ID=dbfbc1c0-0783-4ed7-9d78-08aa4a0cda02
-MUSIC_ID=2995bc8b-d872-4dd1-b396-93fde2f4bfff
+MUSIC_ID=372bb8aa-eecb-482e-bc12-7dfec6080910
 
 # it's convenient to have a second set of id to test deletion (DELETE uses these id with the suffix of 2)
 USER_ID2=9175a76f-7c4d-4a3e-be57-65856c6bb77e

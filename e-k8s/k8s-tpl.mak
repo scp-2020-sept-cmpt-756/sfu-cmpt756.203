@@ -52,6 +52,9 @@ db.svc.log: db/db.yaml db.repo.log db/db-sm.yaml
 	$(KC) -n $(NS) apply -f $< | tee $@
 	$(KC) -n $(NS) apply -f db/db-sm.yaml
 
+#istio.sm: istio-proxy-sm.yaml
+#	$(KC) -n $(NS) apply -f istio-proxy-sm.yaml
+
 scratch:
 	$(KC) delete -n $(NS) deploy cmpt756s1 cmpt756s2 cmpt756db --ignore-not-found=true
 	$(KC) delete -n $(NS) svc cmpt756s1 cmpt756s2 cmpt756db --ignore-not-found=true
