@@ -26,10 +26,10 @@ GAT_DIR=/Users/ted/Documents/Teaching/756-20-3/gatling-charts-highcharts-bundle-
 GAT=$(GAT_DIR)/bin/gatling.sh
 
 SIM_DIR=gatling/simulations
-SIM_PACKAGE=computerdatabase
+SIM_PACKAGE=proj756
 SIM_PACKAGE_DIR=$(SIM_DIR)/$(SIM_PACKAGE)
-SIM_FILE=SimpleS2.scala
-SIM_NAME=$(SIM_PACKAGE).MusicSimulation
+SIM_FILE=ReadTables.scala
+SIM_NAME=$(SIM_PACKAGE).ReadTablesSim
 
 # these might need to change
 APPNS=cmpt756e4
