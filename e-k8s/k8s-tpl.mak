@@ -20,16 +20,24 @@ REGID=tedkirkpatrick
 KC=kubectl
 DK=docker
 AWS=aws
+GAT_DIR=/Users/ted/Documents/Teaching/756-20-3/gatling-charts-highcharts-bundle-3.4.2
+GAT=$(GAT_DIR)/bin/gatling.sh
+JDK_15_HOME=/Users/ted/Documents/Career/Facilities/openjdk/jdk-15.0.1.jdk/Contents/Home
 
 # these might need to change
-NS=cmpt756e4
-#NS=istio-system
+APPNS=cmpt756e4
+ISTIONS=istio-system
 
 
 deploy: gw s1 s2 db
-	$(KC) -n $(NS) get gw,deploy,svc,pods
+	$(KC) -n $(APPNS) get gw,vs,deploy,svc,pods
+
+monitoring: mongw
+	$(KC) -n $(ISTIONS) get gw,vs,deploy,svc,pods
 
 gw: gw.svc.log
+
+mongw: mongw.svc.log
 
 s1: s1.svc.log
 
@@ -38,33 +46,38 @@ s2: s2.svc.log
 db: db.svc.log
 
 gw.svc.log: misc/service-gateway.yaml
-	$(KC) -n $(NS) apply -f $< | tee $@
+	$(KC) -n $(APPNS) apply -f $< | tee $@
+
+mongw.svc.log: misc/monitoring-service-gateway.yaml
+	$(KC) -n $(ISTIONS) apply -f $< | tee $@
 
 s1.svc.log: s1/s1.yaml s1.repo.log s1/s1-sm.yaml
-	$(KC) -n $(NS) apply -f $< | tee $@
-	$(KC) -n $(NS) apply -f s1/s1-sm.yaml
+	$(KC) -n $(APPNS) apply -f $< | tee $@
+	$(KC) -n $(APPNS) apply -f s1/s1-sm.yaml
 
 s2.svc.log: s2/s2.yaml s2.repo.log s2/s2-sm.yaml
-	$(KC) -n $(NS) apply -f $< | tee $@
-	$(KC) -n $(NS) apply -f s2/s2-sm.yaml
+	$(KC) -n $(APPNS) apply -f $< | tee $@
+	$(KC) -n $(APPNS) apply -f s2/s2-sm.yaml
 
 db.svc.log: db/db.yaml db.repo.log db/db-sm.yaml
-	$(KC) -n $(NS) apply -f $< | tee $@
-	$(KC) -n $(NS) apply -f db/db-sm.yaml
+	$(KC) -n $(APPNS) apply -f $< | tee $@
+	$(KC) -n $(APPNS) apply -f db/db-sm.yaml
 
 #istio.sm: istio-proxy-sm.yaml
-#	$(KC) -n $(NS) apply -f istio-proxy-sm.yaml
+#	$(KC) -n $(APPNS) apply -f istio-proxy-sm.yaml
 
 scratch:
-	$(KC) delete -n $(NS) deploy cmpt756s1 cmpt756s2 cmpt756db --ignore-not-found=true
-	$(KC) delete -n $(NS) svc cmpt756s1 cmpt756s2 cmpt756db --ignore-not-found=true
-	$(KC) delete -n $(NS) gw my-gateway --ignore-not-found=true
-	$(KC) delete -n $(NS) vs cmpt756e4 --ignore-not-found=true
-	$(KC) get -n $(NS) gw,vs,deploy,svc,pods
-	/bin/rm -f gw.svc.log s1.svc.log s2.svc.log db.svc.log
+	$(KC) delete -n $(APPNS) deploy cmpt756s1 cmpt756s2 cmpt756db --ignore-not-found=true
+	$(KC) delete -n $(APPNS) svc cmpt756s1 cmpt756s2 cmpt756db --ignore-not-found=true
+	$(KC) delete -n $(APPNS) gw my-gateway --ignore-not-found=true
+	$(KC) delete -n $(APPNS) vs cmpt756e4 --ignore-not-found=true
+	$(KC) delete -n $(ISTIONS) gw monitoring --ignore-not-found=true
+	$(KC) delete -n $(ISTIONS) vs monitoring --ignore-not-found=true
+	$(KC) get -n $(APPNS) gw,vs,deploy,svc,pods
+	/bin/rm -f gw.svc.log mongw.svc.log s1.svc.log s2.svc.log db.svc.log
 
 clean:
-	rm {s1,s2,db}.{img,repo,svc}.log gw.svc.log
+	rm {s1,s2,db}.{img,repo,svc}.log {gw,mongw}.svc.log
 
 extern: showcontext
 	$(KC) -n istio-system get svc istio-ingressgateway
@@ -73,9 +86,9 @@ extern: showcontext
 lsa: showcontext
 	$(KC) get svc --all-namespaces
 
-# show deploy, pods, vs, and svc of cmpt756e4 ns
+# show deploy, pods, vs, and svc of application ns
 ls: showcontext
-	$(KC) get -n $(NS) gw,vs,svc,deployments,pods
+	$(KC) get -n $(APPNS) gw,vs,svc,deployments,pods
 
 # show containers across all pods
 lsd:
@@ -107,6 +120,10 @@ s2.repo.log: s2/Dockerfile s2/app.py s2/requirements.txt
 db.repo.log: db/Dockerfile db/app.py db/requirements.txt
 	make -f docker.mak $@
 
+# reminder of current context
+showcontext:
+	$(KC) config get-contexts
+
 #
 # the AWS DynamoDB service
 #
@@ -114,6 +131,8 @@ db.repo.log: db/Dockerfile db/app.py db/requirements.txt
 dynamodb: misc/cloudformationdynamodb.json
 	$(AWS) cloudformation create-stack --stack-name db --template-body file://$<
 
-# reminder of current context
-showcontext:
-	$(KC) config get-contexts
+#
+# Gatling
+#
+gatling:
+	JAVA_HOME=$(JDK_15_HOME) $(GAT) -rsf gatling/resources -sf gatling/simulations -bf $(GAT_DIR)/target/test-classes -s computerdatabase.MusicSimulation -rd 'Create users'

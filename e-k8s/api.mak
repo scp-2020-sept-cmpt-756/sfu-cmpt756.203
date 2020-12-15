@@ -50,9 +50,12 @@ BODY_UID= { \
     "uid": "dbfbc1c0-0783-4ed7-9d78-08aa4a0cda02" \
 }
 
+ARTIST="Duran Duran"
+SONGTITLE="Rio"
+
 BODY_MUSIC= { \
-  "Artist": "Duran Duran", \
-  "SongTitle": "Rio" \
+  "Artist": "$(ARTIST)", \
+  "SongTitle": "$(SONGTITLE)" \
 }
 
 # this is a token for ???
@@ -66,7 +69,7 @@ USER_ID=dbfbc1c0-0783-4ed7-9d78-08aa4a0cda02
 MUSIC_ID=372bb8aa-eecb-482e-bc12-7dfec6080910
 
 # it's convenient to have a second set of id to test deletion (DELETE uses these id with the suffix of 2)
-USER_ID2=9175a76f-7c4d-4a3e-be57-65856c6bb77e
+USER_ID2=27fac86c-321f-43aa-a9c9-6a7faefbd28d
 MUISC_ID2=8ed63e4f-3b1e-47f8-beb8-3604516e5a2d
 
 
@@ -76,8 +79,7 @@ cuser:
 	$(CURL) --location --request POST 'http://$(IGW)/api/v1/user/' --header 'Content-Type: application/json' --data-raw '$(BODY_USER)' | tee -a cuser.out
 
 cmusic:
-	echo curl --location --request POST 'http://$(IGW)/api/v1/music/' --header '$(TOKEN)' --header 'Content-Type: application/json' --data-raw '$(BODY_MUSIC)' > cmusic.out
-	$(CURL) --location --request POST 'http://$(IGW)/api/v1/music/' --header '$(TOKEN)' --header 'Content-Type: application/json' --data-raw '$(BODY_MUSIC)' | tee -a cmusic.out
+	$(CURL) --location --request POST 'http://$(IGW)/api/v1/music/' --header '$(TOKEN)' --header 'Content-Type: application/json' --data-raw '$(BODY_MUSIC)'
 
 # PUT is used for user (update) to update a record
 uuser:
@@ -91,12 +93,10 @@ rmusic:
 
 # DELETE is used with user or music to delete a record
 duser:
-	echo curl --location --request DELETE 'http://$(IGW)/api/v1/user/$(USER_ID2)' --header '$(TOKEN)' > duser.out
-	$(CURL) --location --request DELETE 'http://$(IGW)/api/v1/user/$(USER_ID2)' --header '$(TOKEN)' | tee -a duser.out
+	$(CURL) --location --request DELETE 'http://$(IGW)/api/v1/user/$(USER_ID2)' --header '$(TOKEN)'
 
 dmusic:
-	echo curl --location --request DELETE 'http://$(IGW)/api/v1/music/$(MUSIC_ID2)' --header '$(TOKEN)' > dmusic.out
-	$(CURL) --location --request DELETE 'http://$(IGW)/api/v1/music/$(MUSIC_ID2)' --header '$(TOKEN)' | tee -a dmusic.out
+	$(CURL) --location --request DELETE 'http://$(IGW)/api/v1/music/$(MUSIC_ID2)' --header '$(TOKEN)'
 
 # PUT is used for login/logoff too
 apilogin:

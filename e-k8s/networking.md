@@ -1,3 +1,19 @@
+## The base installation
+
+We install Prometheus and Grafana using the
+[`kube-prometheus-stack` Helm chart collection](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack).
+The [Helm package manager](https://helm.sh/) manages templated
+Kubernetes manifests, called *charts*.
+
+A closely-related collection, which we are not currently using, is
+[`kube-prometheus`](https://github.com/prometheus-operator/kube-prometheus).
+This collection is written in [jsonnet](jsonnet.org), which is used to
+generate the `.yaml` manifests that would actually be installed.  The
+tools in this collection tend to be more sophisticated than required
+for the simple clusters defined in this class.
+
+Both of these collections are based upon [the Prometheus Operator](https://github.com/prometheus-operator/prometheus-operator).
+
 ## Exploring the underlying mechanisms of the minikube node
 
 In the minikube node (via `minikube ssh`) execute the following
@@ -100,6 +116,8 @@ defines a Kubernetes Service, mapping host OS ports (visible to curl
 and your browser running in your host OS) to target ports in the cluster.
 This mapping is enabled whenever `minikube tunnel` is running.
 
+[Integrating Istio 1.7 with Prometheus](https://istio.io/v1.7/docs/ops/integrations/prometheus/).
+
 ## A pod in the service mesh
 
 Init container: Istio Proxy called to update iptables to establish Istio networking in
@@ -172,6 +190,9 @@ spec:
   namespaceSelector:
     matchNames:
     - cmpt756e4
+[adapter Prometheus stats -> Kubernetes stats for input to HorizontalAutoscaler](https://github.com/DirectXMan12/k8s-prometheus-adapter)
+The `kube-prometheus-stack` does *not* install this.
+
   selector:
     matchLabels:
       app: cmpt756db
@@ -189,6 +210,17 @@ $ kubectl apply -n istio-system -f sm-db.yaml
 
 [ServiceMonitor resource specification](https://docs.openshift.com/container-platform/4.4/rest_api/monitoring_apis/servicemonitor-monitoring-coreos-com-v1.html)
 
+[Prometheus `relabel_config` specification](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config).
+
+StackOverflow answer about
+[adding custom pod metrics to Prometheus](https://stackoverflow.com/questions/53365191/monitor-custom-kubernetes-pod-metrics-using-prometheus)
+
+[Istio standard metrics](https://istio.io/v1.7/docs/reference/config/metrics/)
+
+[Standard Promethus configuration](https://github.com/helm/charts/blob/master/stable/prometheus/values.yaml)
+
+[Prometheus Operator API](https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md)
+
 ## Docker Hub mitigations
 
 [Setting Istio to use Google Container Registry](https://istio.io/latest/blog/2020/docker-rate-limit/)
@@ -202,12 +234,9 @@ compatible with Prometheus metrics.
 
 ## Minikube pods and purposes
 
-Not running:
-[adapter Prometheus stats -> Kubernetes stats for input to HorizontalAutoscaler](https://github.com/DirectXMan12/k8s-prometheus-adapter)
-
 ### `kube-state-metrics`
 
-Service that returns Kubernetes metrics in Prometheus format. To
+This sevice is installed as part of `kube-prometheus-stack`. It returns Kubernetes metrics in Prometheus format. To
 directly query, first forwart the port
 
 ~~~
@@ -220,3 +249,8 @@ This will return *many* metrics.  It is really only useful to test
 that the pod is correctly running.
 
 [`kube-state-metrics` README and source code](https://github.com/kubernetes/kube-state-metrics)
+
+### Potentially useful but not currently installed
+
+[adapter Prometheus stats -> Kubernetes stats for input to HorizontalAutoscaler](https://github.com/DirectXMan12/k8s-prometheus-adapter)
+The `kube-prometheus-stack` does *not* install this.
