@@ -20,9 +20,16 @@ REGID=tedkirkpatrick
 KC=kubectl
 DK=docker
 AWS=aws
+
+JDK_15_HOME=/Users/ted/Documents/Career/Facilities/openjdk/jdk-15.0.1.jdk/Contents/Home
 GAT_DIR=/Users/ted/Documents/Teaching/756-20-3/gatling-charts-highcharts-bundle-3.4.2
 GAT=$(GAT_DIR)/bin/gatling.sh
-JDK_15_HOME=/Users/ted/Documents/Career/Facilities/openjdk/jdk-15.0.1.jdk/Contents/Home
+
+SIM_DIR=gatling/simulations
+SIM_PACKAGE=computerdatabase
+SIM_PACKAGE_DIR=$(SIM_DIR)/$(SIM_PACKAGE)
+SIM_FILE=SimpleS2.scala
+SIM_NAME=$(SIM_PACKAGE).MusicSimulation
 
 # these might need to change
 APPNS=cmpt756e4
@@ -134,5 +141,5 @@ dynamodb: misc/cloudformationdynamodb.json
 #
 # Gatling
 #
-gatling:
-	JAVA_HOME=$(JDK_15_HOME) $(GAT) -rsf gatling/resources -sf gatling/simulations -bf $(GAT_DIR)/target/test-classes -s computerdatabase.MusicSimulation -rd 'Create users'
+gatling: $(SIM_PACKAGE_DIR)/$(SIM_FILE)
+	JAVA_HOME=$(JDK_15_HOME) $(GAT) -rsf gatling/resources -sf $(SIM_DIR) -bf $(GAT_DIR)/target/test-classes -s $(SIM_NAME) -rd 'Run command'
