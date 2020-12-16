@@ -40,7 +40,7 @@ deploy: gw s1 s2 db
 	$(KC) -n $(APPNS) get gw,vs,deploy,svc,pods
 
 monitoring: mongw
-	$(KC) -n $(ISTIONS) get gw,vs,deploy,svc,pods
+	$(KC) -n $(ISTIONS) get gw,vs
 
 gw: gw.svc.log
 
