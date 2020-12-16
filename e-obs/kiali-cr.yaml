@@ -478,8 +478,8 @@ spec:
     grafana:
       auth:
         type: none
-      #in_cluster_url: "http://komplete-prometheus-grafana.istio-system.svc.cluster.local:80"
-      in_cluster_url: "http://10.104.154.85:80"
+      in_cluster_url: "http://komplete-prometheus-grafana.istio-system.svc.cluster.local:80"
+      #in_cluster_url: "http://10.104.154.85:80"
 
 
 # **Istio-specific settings:
@@ -567,7 +567,8 @@ spec:
     prometheus:
       auth:
         type: none
-      url: "http://10.107.149.29:9090"
+      #url: "http://10.107.149.29:9090"
+      url: http://komplete-prometheus-kube-p-prometheus.istio-system.svc.cluster.local:9090
 
 #
 # **Tracing-specific settings:

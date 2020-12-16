@@ -21,6 +21,8 @@ TARGNS=istio-system
 
 # these might need to change
 NS=cmpt756e4
+ISTIO_NS=istio-system
+KIALI_OP_NS=kiali-operator
 
 # this name is derived/dependent on the choice of "komplete-prometheus" specified during install
 # this might also change in step with Prometheus' evolution
@@ -46,8 +48,11 @@ uninstall-prom:
 install-kiali:
 	echo $(HELM) install --namespace $(TARGNS) --set auth.strategy="anonymous" --repo https://kiali.org/helm-charts kiali-server kiali-server > obs-kiali.log
 	#$(HELM) install --namespace $(TARGNS) --set auth.strategy="anonymous" --repo https://kiali.org/helm-charts kiali-server kiali-server | tee -a obs-kiali.log
-	$(KC) create namespace kiali-operator
-	$(HELM) install --set cr.create=true --set cr.namespace=istio-system --namespace kiali-operator --repo https://kiali.org/helm-charts kiali-operator kiali-operator
+	$(KC) create namespace $(KIALI_OP_NS) || true  | tee -a obs-kiali.log
+	$(HELM) install --set cr.create=true --set cr.namespace=$(ISTIO_NS) --namespace $(KIALI_OP_NS) --repo https://kiali.org/helm-charts kiali-operator kiali-operator | tee -a obs-kiali.log
+
+update-kiali:
+	$(KC) apply -n $(ISTIO_NS) -f kiali-cr.yaml | tee -a obs-kiali.log
 
 uninstall-kiali:
 	echo $(HELM) uninstall kiali-server --namespace $(TARGNS) > obs-uninstall-kiali.log
