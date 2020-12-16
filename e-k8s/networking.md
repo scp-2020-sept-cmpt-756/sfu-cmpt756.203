@@ -254,3 +254,8 @@ that the pod is correctly running.
 
 [adapter Prometheus stats -> Kubernetes stats for input to HorizontalAutoscaler](https://github.com/DirectXMan12/k8s-prometheus-adapter)
 The `kube-prometheus-stack` does *not* install this.
+
+## Istio ingress gateway
+
+Envoy proxy.  To debug routing problems, inspect the proxy logs for
+the service endpoint.  [Format of Envoy access logs](https://www.envoyproxy.io/docs/envoy/latest/configuration/observability/access_log/usage)
