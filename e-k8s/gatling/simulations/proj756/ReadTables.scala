@@ -9,7 +9,7 @@ object RMusic {
 
   val feeder = csv("music.csv").eager.random
 
-  val rmusic = repeat(20, "i") {
+  val rmusic = repeat(200, "i") {
     feed(feeder)
     .exec(http("RMusic ${i}")
       .get("/api/v1/music/${UUID}"))
@@ -44,6 +44,7 @@ class ReadTablesSim extends Simulation {
     .exec(RUser.ruser)
 
   setUp(
+    //scnReadTables.inject(constantUsersPerSec(1) during(120 seconds))
     scnReadTables.inject(atOnceUsers(1))
   ).protocols(httpProtocol)
 }
