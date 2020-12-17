@@ -1,34 +1,11 @@
 #
-# SFU CMPT 756.203
+# SFU CMPT 756
 #
 # k8s yaml to provide ingress to the cluster monitoring services on port 80:
 #   Kiali      /kiali       (Successful)
 #   Grafana    /grafana     (Unsuccesful, commented out)
 #   Premetheus /prometheus  (Unsuccesful, commented out)
 #
-# Istio verifiers, such as the one called by Kiali, will complain that we have
-# two Gateways referring to *:80.  This is only a potential problem.  So long
-# as the routes specified by the VirtualServices on each Gateway are disjoint
-# (and these are), there will be no confusion.
-# We have to have two Gateways becuse Kiali and our Python app run in different
-# namespaces.  The Gateway and VirtualService routing a service must themselves
-# be in the same namespace as that service.
-#
-apiVersion: networking.istio.io/v1alpha3
-kind: Gateway
-metadata:
-  name: monitoring
-spec:
-  selector:
-    istio: ingressgateway # use istio default controller
-  servers:
-  - port:
-      number: 80
-      name: http
-      protocol: HTTP
-    hosts:
-    - "*"
----
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -37,7 +14,7 @@ spec:
   hosts:
   - "*"
   gateways:
-  - monitoring
+  - cmpt756e4/my-gateway
   http:
   - match:
     - uri:
