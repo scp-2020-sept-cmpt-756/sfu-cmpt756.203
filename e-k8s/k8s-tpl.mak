@@ -32,19 +32,19 @@ SIM_FILE=ReadTables.scala
 SIM_NAME=$(SIM_PACKAGE).ReadTablesSim
 
 # these might need to change
-APPNS=cmpt756e4
-ISTIONS=istio-system
+APP_NS=cmpt756e4
+ISTIO_NS=istio-system
 
 
-deploy: gw s1 s2 db
-	$(KC) -n $(APPNS) get gw,vs,deploy,svc,pods
+deploy: gw s1 s2 db monitoring
+	$(KC) -n $(APP_NS) get gw,vs,deploy,svc,pods
 
-monitoring: mongw
-	$(KC) -n $(ISTIONS) get gw,vs
+monitoring: monvs
+	$(KC) -n $(ISTIO_NS) get vs
 
 gw: gw.svc.log
 
-mongw: mongw.svc.log
+monvs: monvs.svc.log
 
 s1: s1.svc.log
 
@@ -53,38 +53,35 @@ s2: s2.svc.log
 db: db.svc.log
 
 gw.svc.log: misc/service-gateway.yaml
-	$(KC) -n $(APPNS) apply -f $< | tee $@
+	$(KC) -n $(APP_NS) apply -f $< | tee $@
 
-mongw.svc.log: misc/monitoring-service-gateway.yaml
-	$(KC) -n $(ISTIONS) apply -f $< | tee $@
+monvs.svc.log: misc/monitoring-virtualservice.yaml
+	$(KC) -n $(ISTIO_NS) apply -f $< | tee $@
 
 s1.svc.log: s1/s1.yaml s1.repo.log s1/s1-sm.yaml
-	$(KC) -n $(APPNS) apply -f $< | tee $@
-	$(KC) -n $(APPNS) apply -f s1/s1-sm.yaml
+	$(KC) -n $(APP_NS) apply -f $< | tee $@
+	$(KC) -n $(APP_NS) apply -f s1/s1-sm.yaml
 
 s2.svc.log: s2/s2.yaml s2.repo.log s2/s2-sm.yaml
-	$(KC) -n $(APPNS) apply -f $< | tee $@
-	$(KC) -n $(APPNS) apply -f s2/s2-sm.yaml
+	$(KC) -n $(APP_NS) apply -f $< | tee $@
+	$(KC) -n $(APP_NS) apply -f s2/s2-sm.yaml
 
 db.svc.log: db/db.yaml db.repo.log db/db-sm.yaml
-	$(KC) -n $(APPNS) apply -f $< | tee $@
-	$(KC) -n $(APPNS) apply -f db/db-sm.yaml
-
-#istio.sm: istio-proxy-sm.yaml
-#	$(KC) -n $(APPNS) apply -f istio-proxy-sm.yaml
+	$(KC) -n $(APP_NS) apply -f $< | tee $@
+	$(KC) -n $(APP_NS) apply -f db/db-sm.yaml
 
 scratch:
-	$(KC) delete -n $(APPNS) deploy cmpt756s1 cmpt756s2 cmpt756db --ignore-not-found=true
-	$(KC) delete -n $(APPNS) svc cmpt756s1 cmpt756s2 cmpt756db --ignore-not-found=true
-	$(KC) delete -n $(APPNS) gw my-gateway --ignore-not-found=true
-	$(KC) delete -n $(APPNS) vs cmpt756e4 --ignore-not-found=true
-	$(KC) delete -n $(ISTIONS) gw monitoring --ignore-not-found=true
-	$(KC) delete -n $(ISTIONS) vs monitoring --ignore-not-found=true
-	$(KC) get -n $(APPNS) gw,vs,deploy,svc,pods
-	/bin/rm -f gw.svc.log mongw.svc.log s1.svc.log s2.svc.log db.svc.log
+	$(KC) delete -n $(APP_NS) deploy cmpt756s1 cmpt756s2 cmpt756db --ignore-not-found=true
+	$(KC) delete -n $(APP_NS) svc cmpt756s1 cmpt756s2 cmpt756db --ignore-not-found=true
+	$(KC) delete -n $(APP_NS) gw my-gateway --ignore-not-found=true
+	$(KC) delete -n $(APP_NS) vs cmpt756e4 --ignore-not-found=true
+	$(KC) delete -n $(ISTIO_NS) vs monitoring --ignore-not-found=true
+	$(KC) get -n $(APP_NS) deploy,svc,pods,gw,vs
+	$(KC) get -n $(ISTIO_NS) vs
+	/bin/rm -f gw.svc.log monvs.svc.log s1.svc.log s2.svc.log db.svc.log
 
 clean:
-	rm {s1,s2,db}.{img,repo,svc}.log {gw,mongw}.svc.log
+	rm {s1,s2,db}.{img,repo,svc}.log {gw,monvs}.svc.log
 
 extern: showcontext
 	$(KC) -n istio-system get svc istio-ingressgateway
@@ -95,7 +92,7 @@ lsa: showcontext
 
 # show deploy, pods, vs, and svc of application ns
 ls: showcontext
-	$(KC) get -n $(APPNS) gw,vs,svc,deployments,pods
+	$(KC) get -n $(APP_NS) gw,vs,svc,deployments,pods
 
 # show containers across all pods
 lsd:
@@ -132,9 +129,8 @@ showcontext:
 	$(KC) config get-contexts
 
 #
-# the AWS DynamoDB service
+# Start the AWS DynamoDB service
 #
-
 dynamodb: misc/cloudformationdynamodb.json
 	$(AWS) cloudformation create-stack --stack-name db --template-body file://$<
 
