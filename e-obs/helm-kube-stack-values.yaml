@@ -1,5 +1,14 @@
 prometheus:
   prometheusSpec:
+    ## Prefix used to register routes, overriding externalUrl route.
+    ## Useful for proxies that rewrite URLs.
+    ##
+    # Following was set in an attempt to serve Prometheus from "/prometheus",
+    # which would allow Prometheus to run from `monitoring-service-gateway.yaml`.
+    # Unfortunately, the static resources were still served from /
+    # So I commented it out.  Till this is resolved, run Prometheus from
+    # its own LoadBalanced Service, `prom-ingress`.
+    #routePrefix: /prometheus
     additionalScrapeConfigs:
       # Below copied from https://github.com/helm/charts/blob/master/stable/prometheus/values.yaml
       # Example scrape config for pods
