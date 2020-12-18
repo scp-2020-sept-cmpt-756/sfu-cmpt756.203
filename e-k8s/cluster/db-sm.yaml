@@ -4,11 +4,11 @@ metadata:
   name: cmpt756db
   labels:
     app: cmpt756db
-    release: komplete-prometheus
+    release: c756
 spec:
   namespaceSelector:
     matchNames:
-    - cmpt756e4
+    - c756ns
   selector:
     matchLabels:
       app: cmpt756db

@@ -23,7 +23,7 @@ CURL=curl
 PODS1=pod/cmpt756s1-8557865b4b-jnwrj
 PODCONT=service1
 
-# show deploy and pods in current ns; svc of cmpt756e4 ns
+# show deploy and pods in current ns; svc of cmpt756 ns
 ls: showcontext
 	$(KC) get gw,deployments,pods
 	$(KC) -n $(NS) get svc

@@ -15,11 +15,10 @@
 # registry to side-step DockerHub's throttling of their free accounts.
 # If you wish to switch back to DockerHub, CREG=docker.io
 #
-# TODO: You must fill in your container registry id (REGID)
-#
+# TODO: You must run the template processor to fill in the template variables "ZZ-*"
 #
 
-CREG=ghcr.io
+CREG=ZZ-CR-ID
 REGID=ZZ-REG-ID
 
 DK=docker

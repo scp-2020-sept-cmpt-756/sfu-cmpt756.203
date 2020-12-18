@@ -1,4 +1,3 @@
-
 # Janky front-end to bring some sanity (?) to the litany of tools and switches
 # for working with a k8s cluster. This file adds a set of monitoring and
 # observability tool including: Prometheus, Grafana and Kiali by way of installing
@@ -13,20 +12,19 @@
 # Where possible, stodout outputs are tee into .out files for later review.
 #
 
-
 KC=kubectl
 DK=docker
 HELM=helm
-TARGNS=istio-system
 
 # these might need to change
-NS=cmpt756e4
+APP_NS=c756ns
 ISTIO_NS=istio-system
 KIALI_OP_NS=kiali-operator
 
-# this name is derived/dependent on the choice of "komplete-prometheus" specified during install
-# this might also change in step with Prometheus' evolution
-PROMETHEUSPOD=prometheus-komplete-prometheus-kube-p-prometheus-0
+RELEASE=c756
+
+# This might also change in step with Prometheus' evolution
+PROMETHEUSPOD=prometheus-$(RELEASE)-kube-p-prometheus-0
 
 all: install-prom install-kiali
 
@@ -35,19 +33,19 @@ all: install-prom install-kiali
 init-helm:
 	$(HELM) repo add prometheus-community https://prometheus-community.github.io/helm-charts
 
-# note that the name komplete-prometheus is discretionary; it is used to reference the install 
+# note that the name $(RELEASE) is discretionary; it is used to reference the install 
 # Grafana is included within this Prometheus package
 install-prom:
-	echo $(HELM) install komplete-prometheus --namespace $(TARGNS) prometheus-community/kube-prometheus-stack > obs-install-prometheus.log
-	$(HELM) install komplete-prometheus -f helm-kube-stack-values.yaml --namespace $(TARGNS) prometheus-community/kube-prometheus-stack | tee -a obs-install-prometheus.log
+	echo $(HELM) install $(RELEASE) --namespace $(ISTIO_NS) prometheus-community/kube-prometheus-stack > obs-install-prometheus.log
+	$(HELM) install $(RELEASE) -f helm-kube-stack-values.yaml --namespace $(ISTIO_NS) prometheus-community/kube-prometheus-stack | tee -a obs-install-prometheus.log
 
 uninstall-prom:
-	echo $(HELM) uninstall komplete-prometheus --namespace $(TARGNS) > obs-uninstall-prometheus.log
-	$(HELM) uninstall komplete-prometheus --namespace $(TARGNS) | tee -a obs-uninstall-prometheus.log
+	echo $(HELM) uninstall $(RELEASE) --namespace $(ISTIO_NS) > obs-uninstall-prometheus.log
+	$(HELM) uninstall $(RELEASE) --namespace $(ISTIO_NS) | tee -a obs-uninstall-prometheus.log
 
 install-kiali:
-	echo $(HELM) install --namespace $(TARGNS) --set auth.strategy="anonymous" --repo https://kiali.org/helm-charts kiali-server kiali-server > obs-kiali.log
-	#$(HELM) install --namespace $(TARGNS) --set auth.strategy="anonymous" --repo https://kiali.org/helm-charts kiali-server kiali-server | tee -a obs-kiali.log
+	echo $(HELM) install --namespace $(ISTIO_NS) --set auth.strategy="anonymous" --repo https://kiali.org/helm-charts kiali-server kiali-server > obs-kiali.log
+	# This will fail every time after the first---the "|| true" suffix keeps Make running despite error
 	$(KC) create namespace $(KIALI_OP_NS) || true  | tee -a obs-kiali.log
 	$(HELM) install --set cr.create=true --set cr.namespace=$(ISTIO_NS) --namespace $(KIALI_OP_NS) --repo https://kiali.org/helm-charts kiali-operator kiali-operator | tee -a obs-kiali.log
 
@@ -55,20 +53,20 @@ update-kiali:
 	$(KC) apply -n $(ISTIO_NS) -f kiali-cr.yaml | tee -a obs-kiali.log
 
 uninstall-kiali:
-	echo $(HELM) uninstall kiali-server --namespace $(TARGNS) > obs-uninstall-kiali.log
-	$(HELM) uninstall kiali-server --namespace $(TARGNS) | tee -a obs-uninstall-kiali.log
+	echo $(HELM) uninstall kiali-server --namespace $(ISTIO_NS) > obs-uninstall-kiali.log
+	$(HELM) uninstall kiali-server --namespace $(ISTIO_NS) | tee -a obs-uninstall-kiali.log
 
 promport:
-	$(KC) describe pods $(PROMETHEUSPOD) -n $(TARGNS)
+	$(KC) describe pods $(PROMETHEUSPOD) -n $(ISTIO_NS)
 
 extern: showcontext
-	$(KC) -n istio-system get svc istio-ingressgateway
+	$(KC) -n $(ISTIO_NS) get svc istio-ingressgateway
 
-# show deploy and pods in current ns; svc of cmpt756e4 ns
+# show deploy and pods in current ns; svc of cmpt756 ns
 ls: showcontext
 	$(KC) get gw,deployments,pods
-	$(KC) -n $(NS) get svc
-	$(HELM) list -n $(TARGNS)
+	$(KC) -n $(APP_NS) get svc
+	$(HELM) list -n $(ISTIO_NS)
 
 
 # reminder of current context

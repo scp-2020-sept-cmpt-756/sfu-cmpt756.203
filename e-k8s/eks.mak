@@ -20,7 +20,7 @@ KC=kubectl
 IC=istioctl
 
 # these might need to change
-NS=cmpt756e4
+NS=c756ns
 CLUSTERNAME=aws756
 CTX=aws756
 
@@ -66,7 +66,7 @@ cd:
 lsa: showcontext
 	$(KC) get svc --all-namespaces
 
-# show deploy and pods in current ns; svc of cmpt756e4 ns
+# show deploy and pods in current ns; svc of cmpt756 ns
 ls: showcontext
 	$(KC) get gw,deployments,pods
 	$(KC) -n $(NS) get svc

@@ -14,11 +14,7 @@
 #    can be removed to clean up the logs
 # 3. You must supply your AWS specifics in the secret resource
 #
-# This script is set up for Github's newly announced (and still beta) container
-# registry to side-step DockerHub's throttling of their free accounts.
-# If you wish to switch back to DockerHub, replace ghcr.io with docker.io
-#
-# TODO: You must fill in your container registry id (ZZ-REG-ID)
+# TODO: You must run the template processor to fill in the template variables "ZZ-*"
 #
 apiVersion: v1
 kind: Service
@@ -32,17 +28,6 @@ spec:
     name: http
   selector:
     app: cmpt756db
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: awscred
-type: Opaque
-stringData:
-  AWS_REGION: us-east-1
-  AWS_ACCESS_KEY_ID: your-access-key
-  AWS_SECRET_ACCESS_KEY: your-secret-access-key
-  AWS_SESSION_TOKEN: your-session-token
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -74,7 +59,7 @@ spec:
       serviceAccountName: svc-db
       containers:
       - name: cmpt756db
-        image: ghcr.io/ZZ-REG-ID/cmpt756db:latest
+        image: ZZ-CR-ID/ZZ-REG-ID/cmpt756db:latest
         imagePullPolicy: Always
         envFrom:
         - secretRef:

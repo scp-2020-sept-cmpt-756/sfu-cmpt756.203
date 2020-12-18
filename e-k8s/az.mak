@@ -23,10 +23,10 @@ IC=istioctl
 
 # Azure specific cuz Azure has no eksctl equivalent
 # Thus, resource management (AWS VPC etc) is explicit.
-GRP=cmpt756e4
+GRP=c756ns
 
 # these might need to change
-NS=cmpt756e4
+NS=c756ns
 CLUSTERNAME=az756
 CTX=az756
 
@@ -85,7 +85,7 @@ cd:
 lsa: showcontext
 	$(KC) get svc --all-namespaces
 
-# show deploy and pods in current ns; svc of cmpt756e4 ns
+# show deploy and pods in current ns; svc of cmpt756 ns
 ls: showcontext
 	$(KC) get gw,deployments,pods
 	$(KC) -n $(NS) get svc
@@ -108,7 +108,7 @@ reinstate:
 #	$(KC) apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.3.6/components.yaml
 #	$(KC) get deployment metrics-server -n kube-system
 #	$(KC) apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta8/aio/deploy/recommended.yaml
-#	$(KC) apply -f misc/eks-admin-service-account.yaml
+#	$(KC) apply -f cluster/eks-admin-service-account.yaml
 
 showcontext:
 	$(KC) config get-contexts

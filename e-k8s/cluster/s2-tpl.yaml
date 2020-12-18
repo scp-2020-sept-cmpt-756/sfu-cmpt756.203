@@ -17,7 +17,7 @@
 # registry to side-step DockerHub's throttling of their free accounts.
 # If you wish to switch back to DockerHub, replace ghcr.io with docker.io
 #
-# TODO: You must fill in your container registry id (ZZ-REG-ID)
+# TODO: You must run the template processor to fill in the template variables "ZZ-*"
 #
 apiVersion: v1
 kind: Service
@@ -62,7 +62,7 @@ spec:
       serviceAccountName: svc-s2
       containers:
       - name: service2
-        image: ghcr.io/ZZ-REG-ID/cmpt756s2:latest
+        image: ZZ-CR-ID/ZZ-REG-ID/cmpt756s2:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 30001

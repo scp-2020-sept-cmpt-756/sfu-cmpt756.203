@@ -4,13 +4,24 @@
 # This manifest is used to push your AWS credentials via k8s secret into
 # your cluster for consumption by the db service.
 #
+# You will need to put the AWS credentials here regardless of whether
+# you are running your cluster on AWS, Minikube, Azure, GCP, or anywhere
+# else. No matter where you run, you will be calling AWS DynamoDB as
+# your database.
+#
 apiVersion: v1
 kind: Secret
 metadata:
   name: awscred
 type: Opaque
 stringData:
-  AWS_REGION: us-east-1
-  AWS_ACCESS_KEY_ID: your-access-key
-  AWS_SECRET_ACCESS_KEY: your-secret-access-key
-  AWS_SESSION_TOKEN: your-session-token
+  # If you are running DynamoDB from an AWS starter ID, you must specify us-east-1
+  # as your region.  If you are running from a regular AWS ID, you may specify
+  # any region.  us-west-2 is the AWS region closest to Vancouver and therefore
+  # will have the lowest geolatency.
+  AWS_REGION: ZZ-AWS-REGION
+  AWS_ACCESS_KEY_ID: ZZ-AWS-ACCESS-KEY-ID
+  AWS_SECRET_ACCESS_KEY: ZZ-AWS-SECRET-ACCESS-KEY
+  # A session token is only required if you run DynamoDB from a starter ID.
+  # If you are running from a regular AWS ID, delete the next line
+  AWS_SESSION_TOKEN: ZZ-AWS-SESSION-TOKEN
