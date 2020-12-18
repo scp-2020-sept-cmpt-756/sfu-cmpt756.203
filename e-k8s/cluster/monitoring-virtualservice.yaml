@@ -1,0 +1,103 @@
+#
+# SFU CMPT 756
+#
+# k8s yaml to provide ingress to the cluster monitoring services on port 80:
+#   Kiali      /kiali       (Successful)
+#   Grafana    /grafana     (Unsuccesful, commented out)
+#   Premetheus /prometheus  (Unsuccesful, commented out)
+#
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: monitoring
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - cmpt756e4/my-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /kiali
+    rewrite:
+      uri: /kiali
+    route:
+    - destination:
+        host: kiali
+        port:
+          number: 20001
+  # These commented lines were an attempt to serve Grafana from :80/grafana
+  # and Prometheus from :80/prometheus .  The top pages served correctly but
+  # the static content from both services continued to be served from :80/ .
+  # I got Grafana to work by adding paths for all its static content from :80/ .
+  # But that potentially conflicts with static content from other services and
+  # indeed it conflicted with Prometheus, which also wanted to serve content from :80/api.
+  #
+  # The next FOUR paths are all for Grafana.  The first is for the base page,
+  # the next three for the static resources that page loads.
+  # This is a TERRIBLE way to organize this virtual service, as it
+  # means if any OTHER service on port 80 wants to load from these
+  # routes, that service will fail.
+  # Attempt to service Grafana from :80/grafana
+  #- match:
+  #  - uri:
+  #      prefix: /grafana
+  #  rewrite:
+  #    uri: /
+  #  route:
+  #  - destination:
+  #      host: komplete-prometheus-grafana
+  #      port:
+  #        number: 80
+  #- match:
+  #  - uri:
+  #      prefix: /public
+  #  rewrite:
+  #    uri: /public
+  #  route:
+  #  - destination:
+  #      host: komplete-prometheus-grafana
+  #      port:
+  #        number: 80
+  #- match:
+  #  - uri:
+  #      prefix: /api
+  #  rewrite:
+  #    uri: /api
+  #  route:
+  #  - destination:
+  #      host: komplete-prometheus-grafana
+  #      port:
+  #        number: 80
+  #- match:
+  #  - uri:
+  #      prefix: /avatar
+  #  rewrite:
+  #    uri: /avatar
+  #  route:
+  #  - destination:
+  #      host: komplete-prometheus-grafana
+  #      port:
+  #        number: 80
+  # Attempt to serve Prometheus from :80/prometheus
+  #- match:
+  #  - uri:
+  #      prefix: /prometheus
+  #  rewrite:
+  #    uri: /prometheus
+  #  route:
+  #  - destination:
+  #      host: komplete-prometheus-kube-p-prometheus
+  #      port:
+  #        number: 9090
+  # Prometheus static resources
+  #- match:
+  #  - uri:
+  #      prefix: /static
+  #  rewrite:
+  #    uri: /static
+  #  route:
+  #  - destination:
+  #      host: komplete-prometheus-kube-p-prometheus
+  #      port:
+  #        number: 9090

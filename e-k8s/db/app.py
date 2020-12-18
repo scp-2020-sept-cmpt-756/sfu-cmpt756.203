@@ -11,8 +11,14 @@ from boto3.dynamodb.conditions import Key, Attr
 from flask import request
 from flask import Response
 from flask import Blueprint
+from prometheus_flask_exporter import PrometheusMetrics
+
 
 app = Flask(__name__)
+
+metrics = PrometheusMetrics(app)
+metrics.info('app_info', 'Database process')
+
 bp = Blueprint('app', __name__)
 #with open('config.json') as file:
 #    data = json.load(file)
@@ -119,6 +125,9 @@ def health():
 def readiness():
     return Response("", status=200, mimetype="application/json")
 
+# All database calls will have this prefix.  Prometheus metric
+# calls will not---they will have route '/metrics'.  This is
+# the conventional organization.
 app.register_blueprint(bp, url_prefix='/api/v1/datastore/')
 
 if __name__ == '__main__':
@@ -127,4 +136,5 @@ if __name__ == '__main__':
         sys.exit(-1)
 
     p = int(sys.argv[1])
-    app.run(host='0.0.0.0', port=p, debug=True, threaded=True)
+    # Do not set debug=True---that will disable the Prometheus metrics
+    app.run(host='0.0.0.0', port=p, threaded=True)

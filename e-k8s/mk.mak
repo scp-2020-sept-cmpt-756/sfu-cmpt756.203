@@ -83,7 +83,7 @@ reinstate:
 	$(KC) create ns $(NS) | tee -a mk-reinstate.log
 	$(KC) config set-context $(CTX) --namespace=$(NS) | tee -a mk-reinstate.log
 	$(KC) label ns $(NS) istio-injection=enabled | tee -a mk-reinstate.log
-	$(IC) install --set profile=demo | tee -a mk-reinstate.log
+	$(IC) install --set profile=demo --set hub=gcr.io/istio-release | tee -a mk-reinstate.log
 
 # show contexts available
 showcontext:

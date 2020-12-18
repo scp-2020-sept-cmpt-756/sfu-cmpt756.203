@@ -1,0 +1,17 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: cmpt756db
+  labels:
+    app: cmpt756db
+    release: komplete-prometheus
+spec:
+  namespaceSelector:
+    matchNames:
+    - cmpt756e4
+  selector:
+    matchLabels:
+      app: cmpt756db
+  endpoints:
+  - port: http
+    path: /metrics

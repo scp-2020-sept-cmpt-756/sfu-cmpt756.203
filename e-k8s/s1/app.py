@@ -9,10 +9,17 @@ import time
 from flask import request
 from flask import Response
 from flask import Blueprint
+from prometheus_flask_exporter import PrometheusMetrics
+
 app = Flask(__name__)
+
+metrics = PrometheusMetrics(app)
+metrics.info('app_info', 'User process')
+
 bp = Blueprint('app', __name__)
+
 db = {
-    "name": "http://host.docker.internal:30002/api/v1/datastore",
+    "name": "http://cmpt756db:30002/api/v1/datastore",
     "endpoint": [
         "read",
         "write",
@@ -23,7 +30,7 @@ db = {
 
 @bp.route('/', methods=['GET'])
 def hello_world():
-    return 'This is the default route for the users service. It is supposed to return a list of all the users (maybe implement via table cursor)'
+    return 'If you are reading this in a browser, your service is operational. Switch to curl/Postman/etc to interact using the other HTTP verbs.'
 
 @bp.route('/health')
 def health():
@@ -108,11 +115,17 @@ def logoff():
     except:
         return json.dumps({"message": "error reading parameters"})
     return {}
+
+# All database calls will have this prefix.  Prometheus metric
+# calls will not---they will have route '/metrics'.  This is
+# the conventional organization.
 app.register_blueprint(bp, url_prefix='/api/v1/user/')
+
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        logging.error("missing port arg 1")
+        logging.error("Usage: app.py <service-port>")
         sys.exit(-1)
 
     p = int(sys.argv[1])
-    app.run(host='0.0.0.0', port=p, debug=True, threaded=True)
+    # Do not set debug=True---that will disable the Prometheus metrics
+    app.run(host='0.0.0.0', port=p, threaded=True)

@@ -36,7 +36,8 @@ logs:
 #IGW=172.16.199.128:31413
 #IGW=10.96.57.211:80
 #IGW=a344add95f74b453684bcd29d1461240-517644147.us-east-1.elb.amazonaws.com:80
-IGW=localhost:80
+#IGW=localhost:80
+IGW=127.0.0.1:80
 
 # stock body & fragment for API requests
 BODY_USER= { \
@@ -46,26 +47,29 @@ BODY_USER= { \
 }
 
 BODY_UID= { \
-    "uid": "0d2a2931-8be6-48fc-aa9e-5a0f9f536bd3" \
+    "uid": "dbfbc1c0-0783-4ed7-9d78-08aa4a0cda02" \
 }
 
+ARTIST="Duran Duran"
+SONGTITLE="Rio"
+
 BODY_MUSIC= { \
-  "Artist": "Duran Duran", \
-  "SongTitle": "Rio" \
+  "Artist": "$(ARTIST)", \
+  "SongTitle": "$(SONGTITLE)" \
 }
 
 # this is a token for ???
-TOKEN=Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiMDI3Yzk5ZWYtM2UxMi00ZmM5LWFhYzgtMTcyZjg3N2MyZDI0IiwidGltZSI6MTYwMTA3NDY0NC44MTIxNjg2fQ.hR5Gbw5t2VMpLcj8yDz1B6tcWsWCFNiHB_KHpvQVNls
+TOKEN=Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiZGJmYmMxYzAtMDc4My00ZWQ3LTlkNzgtMDhhYTRhMGNkYTAyIiwidGltZSI6MTYwNzM2NTU0NC42NzIwNTIxfQ.zL4i58j62q8mGUo5a0SQ7MHfukBUel8yl8jGT5XmBPo
 BODY_TOKEN={ \
-    "jwt": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiMDI3Yzk5ZWYtM2UxMi00ZmM5LWFhYzgtMTcyZjg3N2MyZDI0IiwidGltZSI6MTYwMTA3NDY0NC44MTIxNjg2fQ.hR5Gbw5t2VMpLcj8yDz1B6tcWsWCFNiHB_KHpvQVNls" \
+    "jwt": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiZGJmYmMxYzAtMDc4My00ZWQ3LTlkNzgtMDhhYTRhMGNkYTAyIiwidGltZSI6MTYwNzM2NTU0NC42NzIwNTIxfQ.zL4i58j62q8mGUo5a0SQ7MHfukBUel8yl8jGT5XmBPo" \
 }
 
 # keep these ones around
-USER_ID=0d2a2931-8be6-48fc-aa9e-5a0f9f536bd3
-MUSIC_ID=2995bc8b-d872-4dd1-b396-93fde2f4bfff
+USER_ID=dbfbc1c0-0783-4ed7-9d78-08aa4a0cda02
+MUSIC_ID=372bb8aa-eecb-482e-bc12-7dfec6080910
 
 # it's convenient to have a second set of id to test deletion (DELETE uses these id with the suffix of 2)
-USER_ID2=9175a76f-7c4d-4a3e-be57-65856c6bb77e
+USER_ID2=27fac86c-321f-43aa-a9c9-6a7faefbd28d
 MUISC_ID2=8ed63e4f-3b1e-47f8-beb8-3604516e5a2d
 
 
@@ -75,8 +79,7 @@ cuser:
 	$(CURL) --location --request POST 'http://$(IGW)/api/v1/user/' --header 'Content-Type: application/json' --data-raw '$(BODY_USER)' | tee -a cuser.out
 
 cmusic:
-	echo curl --location --request POST 'http://$(IGW)/api/v1/music/' --header '$(TOKEN)' --header 'Content-Type: application/json' --data-raw '$(BODY_MUSIC)' > cmusic.out
-	$(CURL) --location --request POST 'http://$(IGW)/api/v1/music/' --header '$(TOKEN)' --header 'Content-Type: application/json' --data-raw '$(BODY_MUSIC)' | tee -a cmusic.out
+	$(CURL) --location --request POST 'http://$(IGW)/api/v1/music/' --header '$(TOKEN)' --header 'Content-Type: application/json' --data-raw '$(BODY_MUSIC)'
 
 # PUT is used for user (update) to update a record
 uuser:
@@ -90,12 +93,10 @@ rmusic:
 
 # DELETE is used with user or music to delete a record
 duser:
-	echo curl --location --request DELETE 'http://$(IGW)/api/v1/user/$(USER_ID2)' --header '$(TOKEN)' > duser.out
-	$(CURL) --location --request DELETE 'http://$(IGW)/api/v1/user/$(USER_ID2)' --header '$(TOKEN)' | tee -a duser.out
+	$(CURL) --location --request DELETE 'http://$(IGW)/api/v1/user/$(USER_ID2)' --header '$(TOKEN)'
 
 dmusic:
-	echo curl --location --request DELETE 'http://$(IGW)/api/v1/music/$(MUSIC_ID2)' --header '$(TOKEN)' > dmusic.out
-	$(CURL) --location --request DELETE 'http://$(IGW)/api/v1/music/$(MUSIC_ID2)' --header '$(TOKEN)' | tee -a dmusic.out
+	$(CURL) --location --request DELETE 'http://$(IGW)/api/v1/music/$(MUSIC_ID2)' --header '$(TOKEN)'
 
 # PUT is used for login/logoff too
 apilogin:
