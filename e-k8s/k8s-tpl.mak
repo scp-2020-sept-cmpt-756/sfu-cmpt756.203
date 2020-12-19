@@ -18,9 +18,13 @@ REGID=ZZ-REG-ID
 JAVA_HOME=ZZ-JAVA-HOME
 GAT_DIR=ZZ-GAT-DIR
 
+# Keep all the logs out of main directory
+LOG_DIR=logs
+
 KC=kubectl
 DK=docker
 AWS=aws
+IC=istioctl
 
 # Gatling parameters---you should not have to change these
 GAT=$(GAT_DIR)/bin/gatling.sh
@@ -34,31 +38,49 @@ SIM_NAME=$(SIM_PACKAGE).ReadTablesSim
 APP_NS=c756ns
 ISTIO_NS=istio-system
 
+# This is the only entry that *must* be run from k8s-tpl.mak
+# (because it creates k8s.mak)
+templates:
+	tools/process-templates.sh
 
-deploy: gw s1 s2 db monitoring
+istio:
+	$(IC) install --set profile=demo --set hub=gcr.io/istio-release | tee -a $(LOG_DIR)/mk-reinstate.log
+
+deploy: appns gw s1 s2 db monitoring
 	$(KC) -n $(APP_NS) get gw,vs,deploy,svc,pods
+
+appns:
+	# Appended "|| true" so that make continues even when command fails
+	# because namespace already exists
+	$(KC) create ns $(APP_NS) || true
+	$(KC) label namespace $(APP_NS) istio-injection=enabled
 
 monitoring: monvs
 	$(KC) -n $(ISTIO_NS) get vs
 
 gw: cluster/service-gateway.yaml
-	$(KC) -n $(APP_NS) apply -f $< > gw.log
+	$(KC) -n $(APP_NS) apply -f $< > $(LOG_DIR)/gw.log
 
 monvs: cluster/monitoring-virtualservice.yaml
-	$(KC) -n $(ISTIO_NS) apply -f $< > monvs.log
+	$(KC) -n $(ISTIO_NS) apply -f $< > $(LOG_DIR)/monvs.log
 
-s1: cluster/s1.yaml s1.repo.log cluster/s1-sm.yaml
-	$(KC) -n $(APP_NS) apply -f $< > s1.log
-	$(KC) -n $(APP_NS) apply -f cluster/s1-sm.yaml >> s1.log
+s1: cluster/s1.yaml s1-build cluster/s1-sm.yaml
+	$(KC) -n $(APP_NS) apply -f $< > $(LOG_DIR)/s1.log
+	$(KC) -n $(APP_NS) apply -f cluster/s1-sm.yaml >> $(LOG_DIR)/s1.log
 
-s2: cluster/s2.yaml s2.repo.log cluster/s2-sm.yaml
-	$(KC) -n $(APP_NS) apply -f $< > s2.log
-	$(KC) -n $(APP_NS) apply -f cluster/s2-sm.yaml >> s2.log
+s2: cluster/s2.yaml s2-build cluster/s2-sm.yaml
+	$(KC) -n $(APP_NS) apply -f $< > $(LOG_DIR)/s2.log
+	$(KC) -n $(APP_NS) apply -f cluster/s2-sm.yaml >> $(LOG_DIR)/s2.log
 
-db: cluster/db.yaml db.repo.log cluster/db-sm.yaml cluster/awscred.yaml
-    	$(KC) -n $(APP_NS) apply -f cluster/awscred.yaml > db.log
-	$(KC) -n $(APP_NS) apply -f $< >> db.log
-	$(KC) -n $(APP_NS) apply -f cluster/db-sm.yaml >> db.log
+db: cluster/db.yaml db-build cluster/db-sm.yaml cluster/awscred.yaml
+	$(KC) -n $(APP_NS) apply -f cluster/awscred.yaml > $(LOG_DIR)/db.log
+	$(KC) -n $(APP_NS) apply -f $< >> $(LOG_DIR)/db.log
+	$(KC) -n $(APP_NS) apply -f cluster/db-sm.yaml >> $(LOG_DIR)/db.log
+
+health-off:
+	$(KC) -n $(APP_NS) apply -f cluster/s1-nohealth.yaml
+	$(KC) -n $(APP_NS) apply -f cluster/s2-nohealth.yaml
+	$(KC) -n $(APP_NS) apply -f cluster/db-nohealth.yaml
 
 scratch: clean
 	$(KC) delete -n $(APP_NS) deploy cmpt756s1 cmpt756s2 cmpt756db --ignore-not-found=true
@@ -70,7 +92,7 @@ scratch: clean
 	$(KC) get -n $(ISTIO_NS) vs
 
 clean:
-	/bin/rm -f {s1,s2,db,gw,monvs}.log
+	/bin/rm -f $(LOG_DIR)/{s1,s2,db,gw,monvs}.log
 
 extern: showcontext
 	$(KC) -n istio-system get svc istio-ingressgateway
@@ -88,9 +110,9 @@ lsd:
 	$(KC) get pods --all-namespaces -o=jsonpath='{range .items[*]}{"\n"}{.metadata.name}{":\t"}{range .spec.containers[*]}{.image}{", "}{end}{end}' | sort
 
 cr:
-	$(DK) push $(CREG)/$(REGID)/cmpt756s1:latest | tee s1.repo.log
-	$(DK) push $(CREG)/$(REGID)/cmpt756s2:latest | tee s2.repo.log
-	$(DK) push $(CREG)/$(REGID)/cmpt756db:latest | tee db.repo.log
+	$(DK) push $(CREG)/$(REGID)/cmpt756s1:latest | tee $(LOG_DIR)/s1.repo.log
+	$(DK) push $(CREG)/$(REGID)/cmpt756s2:latest | tee $(LOG_DIR)/s2.repo.log
+	$(DK) push $(CREG)/$(REGID)/cmpt756db:latest | tee $(LOG_DIR)/db.repo.log
 
 # handy bits for the container images... not necessary
 
@@ -102,23 +124,23 @@ image: showcontext
 #
 # the s1 service
 #
-s1: s1/Dockerfile s1/app.py s1/requirements.txt
-	$(DK) build -t $(CREG)/$(REGID)/cmpt756s1:latest s1 | tee s1.img.log
-	$(DK) push $(CREG)/$(REGID)/cmpt756s1:latest | tee s1.repo.log
+s1-build: s1/Dockerfile s1/app.py s1/requirements.txt
+	$(DK) build -t $(CREG)/$(REGID)/cmpt756s1:latest s1 | tee $(LOG_DIR)/s1.img.log
+	$(DK) push $(CREG)/$(REGID)/cmpt756s1:latest | tee $(LOG_DIR)/s1.repo.log
 
 #
 # the s2 service
 #
-s2: s2/Dockerfile s2/app.py s2/requirements.txt
-	$(DK) build -t $(CREG)/$(REGID)/cmpt756s2:latest s2 | tee s2.img.log
-	$(DK) push $(CREG)/$(REGID)/cmpt756s2:latest | tee s2.repo.log
+s2-build: s2/Dockerfile s2/app.py s2/requirements.txt
+	$(DK) build -t $(CREG)/$(REGID)/cmpt756s2:latest s2 | tee $(LOG_DIR)/s2.img.log
+	$(DK) push $(CREG)/$(REGID)/cmpt756s2:latest | tee $(LOG_DIR)/s2.repo.log
 
 #
 # the db service
 #
-db: db/Dockerfile db/app.py db/requirements.txt
-	$(DK) build -t $(CREG)/$(REGID)/cmpt756db:latest db | tee db.img.log
-	$(DK) push $(CREG)/$(REGID)/cmpt756db:latest | tee db.repo.log
+db-build: db/Dockerfile db/app.py db/requirements.txt
+	$(DK) build -t $(CREG)/$(REGID)/cmpt756db:latest db | tee $(LOG_DIR)/db.img.log
+	$(DK) push $(CREG)/$(REGID)/cmpt756db:latest | tee $(LOG_DIR)/db.repo.log
 
 # reminder of current context
 showcontext:

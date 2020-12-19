@@ -23,6 +23,8 @@ REGID=ZZ-REG-ID
 
 DK=docker
 
+# Keep all the logs out of main directory
+LOG_DIR=logs
 
 all: s1 s2 db
 
@@ -32,19 +34,19 @@ deploy:
 	$(DK) run -t --publish 30002:30002 --detach --name db $(CREG)/$(REGID)/cmpt756db:latest | tee db.svc.log
 
 clean:
-	rm {s1,s2,db}.{img,repo,svc}.log
+	rm $(LOG_DIR)/{s1,s2,db}.{img,repo,svc}.log
 
 s1: s1/Dockerfile
-	$(DK) build -t $(CREG)/$(REGID)/cmpt756s1:latest s1 | tee s1.img.log
-	$(DK) push $(CREG)/$(REGID)/cmpt756s1:latest | tee s1.repo.log
+	$(DK) build -t $(CREG)/$(REGID)/cmpt756s1:latest s1 | tee $(LOG_DIR)/s1.img.log
+	$(DK) push $(CREG)/$(REGID)/cmpt756s1:latest | tee $(LOG_DIR)/s1.repo.log
 
 s2: s2/Dockerfile
-	$(DK) build -t $(CREG)/$(REGID)/cmpt756s2:latest s2 | tee s2.img.log
-	$(DK) push $(CREG)/$(REGID)/cmpt756s2:latest | tee s2.repo.log
+	$(DK) build -t $(CREG)/$(REGID)/cmpt756s2:latest s2 | tee $(LOG_DIR)/s2.img.log
+	$(DK) push $(CREG)/$(REGID)/cmpt756s2:latest | tee $(LOG_DIR)/s2.repo.log
 
 db: db/Dockerfile
-	$(DK) build -t $(CREG)/$(REGID)/cmpt756db:latest db | tee db.img.log
-	$(DK) push $(CREG)/$(REGID)/cmpt756db:latest | tee db.repo.log
+	$(DK) build -t $(CREG)/$(REGID)/cmpt756db:latest db | tee $(LOG_DIR)/db.img.log
+	$(DK) push $(CREG)/$(REGID)/cmpt756db:latest | tee $(LOG_DIR)/db.repo.log
 
 godocker:
 	cp s1/appd.py s1/app.py

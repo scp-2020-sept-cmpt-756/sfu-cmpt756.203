@@ -20,6 +20,8 @@ AZ=az
 KC=kubectl
 IC=istioctl
 
+# Keep all the logs out of main directory
+LOG_DIR=logs
 
 # Azure specific cuz Azure has no eksctl equivalent
 # Thus, resource management (AWS VPC etc) is explicit.
@@ -51,22 +53,22 @@ KVER=1.19.0
 #
 start: showcontext
 	date | tee az-cluster.log
-	$(AZ) group create --name $(GRP) --location $(REGION) | tee -a az-cluster.log
-	$(AKS) create --resource-group $(GRP) --name $(CLUSTERNAME) --kubernetes-version $(KVER) --node-count 2 --node-vm-size $(NTYPE) --generate-ssh-keys | tee -a az-cluster.log
-	$(AKS) get-credentials --resource-group $(GRP) --name $(CLUSTERNAME) | tee -a az-cluster.log
+	$(AZ) group create --name $(GRP) --location $(REGION) | tee -a $(LOG_DIR)/az-cluster.log
+	$(AKS) create --resource-group $(GRP) --name $(CLUSTERNAME) --kubernetes-version $(KVER) --node-count 2 --node-vm-size $(NTYPE) --generate-ssh-keys | tee -a $(LOG_DIR)/az-cluster.log
+	$(AKS) get-credentials --resource-group $(GRP) --name $(CLUSTERNAME) | tee -a $(LOG_DIR)/az-cluster.log
 	cp ~/.ssh/id_rsa az-cluster-public-key
-	cat az-cluster-public-key | tee -a az-cluster.log
+	cat az-cluster-public-key | tee -a $(LOG_DIR)/az-cluster.log
 	cp ~/.ssh/id_rsa.pub az-cluster-private-key
-	cat az-cluster-private-key | tee -a az-cluster.log
-	$(AKS) list | tee -a az-cluster.log
-	date | tee -a az-cluster.log
+	cat az-cluster-private-key | tee -a $(LOG_DIR)/az-cluster.log
+	$(AKS) list | tee -a $(LOG_DIR)/az-cluster.log
+	date | tee -a $(LOG_DIR)/az-cluster.log
 
 
 stop:
-	$(AKS) delete --name $(CLUSTERNAME) --resource-group $(GRP) -y --no-wait | tee aks-stop.log
+	$(AKS) delete --name $(CLUSTERNAME) --resource-group $(GRP) -y --no-wait | tee $(LOG_DIR)/aks-stop.log
 
 status: showcontext
-	$(AKS) list | tee eks-status.log
+	$(AKS) list | tee $(LOG_DIR)/eks-status.log
 
 dashboard: showcontext
 	echo Please follow instructions at https://docs.aws.amazon.com/eks/latest/userguide/dashboard-tutorial.html
@@ -98,11 +100,11 @@ lsd:
 # do this whenever you create/restart your cluster
 # NB: You must rename the long context name down to $(CTX) before using this
 reinstate:
-	$(KC) config use-context $(CTX) | tee -a az-reinstate.log
-	$(KC) create ns $(NS) | tee -a az-reinstate.log
-	$(KC) config set-context $(CTX) --namespace=$(NS) | tee -a az-reinstate.log
-	$(KC) label ns $(NS) istio-injection=enabled | tee -a az-reinstate.log
-	$(IC) install --set profile=demo | tee -a az-reinstate.log
+	$(KC) config use-context $(CTX) | tee -a $(LOG_DIR)/az-reinstate.log
+	$(KC) create ns $(NS) | tee -a $(LOG_DIR)/az-reinstate.log
+	$(KC) config set-context $(CTX) --namespace=$(NS) | tee -a $(LOG_DIR)/az-reinstate.log
+	$(KC) label ns $(NS) istio-injection=enabled | tee -a $(LOG_DIR)/az-reinstate.log
+	$(IC) install --set profile=demo | tee -a $(LOG_DIR)/az-reinstate.log
 
 #setupdashboard:
 #	$(KC) apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.3.6/components.yaml

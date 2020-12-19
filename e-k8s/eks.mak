@@ -19,6 +19,9 @@ EKS=eksctl
 KC=kubectl
 IC=istioctl
 
+# Keep all the logs out of main directory
+LOG_DIR=logs
+
 # these might need to change
 NS=c756ns
 CLUSTERNAME=aws756
@@ -32,22 +35,22 @@ KVER=1.17
 
 
 start: showcontext
-	$(EKS) create cluster --name $(CLUSTERNAME) --version $(KVER) --region $(REGION) --nodegroup-name $(NGROUP) --node-type $(NTYPE) --nodes 2 --nodes-min 2 --nodes-max 2 --managed | tee eks-cluster.log
+	$(EKS) create cluster --name $(CLUSTERNAME) --version $(KVER) --region $(REGION) --nodegroup-name $(NGROUP) --node-type $(NTYPE) --nodes 2 --nodes-min 2 --nodes-max 2 --managed | tee $(LOG_DIR)/eks-cluster.log
 
 
 stop:
-	$(EKS) delete cluster --name $(CLUSTERNAME) --region $(REGION) | tee eks-delete.log
+	$(EKS) delete cluster --name $(CLUSTERNAME) --region $(REGION) | tee $(LOG_DIR)/eks-delete.log
 
 up:
-	$(EKS) create nodegroup --cluster $(CLUSTERNAME) --region $(REGION) --name $(NGROUP) --node-type $(NTYPE) --nodes 2 --nodes-min 2 --nodes-min 2 --managed | tee repl-nodes.log
+	$(EKS) create nodegroup --cluster $(CLUSTERNAME) --region $(REGION) --name $(NGROUP) --node-type $(NTYPE) --nodes 2 --nodes-min 2 --nodes-min 2 --managed | tee $(LOG_DIR)/repl-nodes.log
 
 down:
 	$(EKS) delete nodegroup --cluster=$(CLUSTERNAME) --region $(REGION) --name=$(NGROUP)
-	rm repl-nodes.log
+	rm $(LOG_DIR)/repl-nodes.log
 
 status: showcontext
-	$(EKS) get cluster --region $(REGION) | tee eks-status.log
-	$(EKS) get nodegroup --cluster $(CLUSTERNAME) --region $(REGION) | tee -a eks-status.log
+	$(EKS) get cluster --region $(REGION) | tee $(LOG_DIR)/eks-status.log
+	$(EKS) get nodegroup --cluster $(CLUSTERNAME) --region $(REGION) | tee -a $(LOG_DIR)/eks-status.log
 
 dashboard: showcontext
 	echo Please follow instructions at https://docs.aws.amazon.com/eks/latest/userguide/dashboard-tutorial.html
@@ -79,11 +82,11 @@ lsd:
 # do this whenever you create/restart your cluster
 # NB: You must rename the long context name down to $(CTX) before using this
 reinstate:
-	$(KC) config use-context $(CTX) | tee -a eks-reinstate.log
-	$(KC) create ns $(NS) | tee -a eks-reinstate.log
-	$(KC) config set-context $(CTX) --namespace=$(NS) | tee -a eks-reinstate.log
-	$(KC) label ns $(NS) istio-injection=enabled | tee -a eks-reinstate.log
-	$(IC) install --set profile=demo | tee -a eks-reinstate.log
+	$(KC) config use-context $(CTX) | tee -a $(LOG_DIR)/eks-reinstate.log
+	$(KC) create ns $(NS) | tee -a $(LOG_DIR)/eks-reinstate.log
+	$(KC) config set-context $(CTX) --namespace=$(NS) | tee -a $(LOG_DIR)/eks-reinstate.log
+	$(KC) label ns $(NS) istio-injection=enabled | tee -a $(LOG_DIR)/eks-reinstate.log
+	$(IC) install --set profile=demo | tee -a $(LOG_DIR)/eks-reinstate.log
 
 setupdashboard:
 	echo TODO

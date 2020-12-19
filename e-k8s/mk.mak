@@ -20,10 +20,12 @@ MK=minikube
 KC=kubectl
 IC=istioctl
 
+# Keep all the logs out of main directory
+LOG_DIR=logs
+
 
 # these might need to change
 NS=c756ns
-CLUSTER=minikube
 CTX=minikube
 DRIVER=virtualbox
 
@@ -32,18 +34,19 @@ KVER=1.19.2
 
 # output: mk-cluster.log
 start:
-	echo $(MK) start --kubernetes-version='$(KVER)' driver=$(DRIVER) > mk-cluster.log
-	$(MK) start --kubernetes-version='$(KVER)' driver=$(DRIVER)| tee -a mk-cluster.log
+	echo $(MK) start --kubernetes-version='$(KVER)' driver=$(DRIVER) > $(LOG_DIR)/mk-cluster.log
+	$(MK) start -p $(CTX) --kubernetes-version='$(KVER)' driver=$(DRIVER) | tee -a $(LOG_DIR)/mk-cluster.log
+	$(MK) profile $(CTX) | tee -a $(LOG_DIR)/mk-cluster.log
 
 stop: showcontext
-	$(MK) stop | tee mk-stop.log
+	$(MK) stop | tee $(LOG_DIR)/mk-stop.log
 
 delete: showcontext
-	$(MK) delete | tee mk-delete.log
+	$(MK) delete | tee $(LOG_DIR)/mk-delete.log
 
 # output: mk-status.log
 status: showcontext
-	$(MK) status | tee mk-status.log
+	$(MK) status | tee $(LOG_DIR)/mk-status.log
 
 # start up Minikube's nice dashboard
 dashboard:
@@ -79,11 +82,11 @@ lsd:
 # do this whenever you restart your cluster
 # output: mk-reinstate.log
 reinstate:
-	$(KC) config use-context $(CTX) | tee mk-reinstate.log
-	$(KC) create ns $(NS) | tee -a mk-reinstate.log
-	$(KC) config set-context $(CTX) --namespace=$(NS) | tee -a mk-reinstate.log
-	$(KC) label ns $(NS) istio-injection=enabled | tee -a mk-reinstate.log
-	$(IC) install --set profile=demo --set hub=gcr.io/istio-release | tee -a mk-reinstate.log
+	$(KC) config use-context $(CTX) | tee $(LOG_DIR)/mk-reinstate.log
+	$(KC) create ns $(NS) | tee -a $(LOG_DIR)/mk-reinstate.log
+	$(KC) config set-context $(CTX) --namespace=$(NS) | tee -a $(LOG_DIR)/mk-reinstate.log
+	$(KC) label ns $(NS) istio-injection=enabled | tee -a $(LOG_DIR)/mk-reinstate.log
+	$(IC) install --set profile=demo --set hub=gcr.io/istio-release | tee -a $(LOG_DIR)/mk-reinstate.log
 
 # show contexts available
 showcontext:

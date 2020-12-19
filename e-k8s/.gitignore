@@ -1,5 +1,4 @@
-*.log
-*.out
+logs
 k8s.mak
 docker.mak
 api.mak

@@ -1,5 +1,8 @@
 db.yaml
 s1.yaml
 s2.yaml
+db-nohealth.yaml
+s1-nohealth.yaml
+s2-nohealth.yaml
 awscred.yaml
 tpl-vars.txt

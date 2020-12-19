@@ -565,7 +565,7 @@ spec:
     prometheus:
       auth:
         type: none
-      url: http://c756-kube-p-prometheus.istio-system.svc.cluster.local:9090
+      url: http://c756-kube-prometheus-stack-prometheus.istio-system.svc.cluster.local:9090
 
 #
 # **Tracing-specific settings:
