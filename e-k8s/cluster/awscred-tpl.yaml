@@ -23,5 +23,5 @@ stringData:
   AWS_ACCESS_KEY_ID: ZZ-AWS-ACCESS-KEY-ID
   AWS_SECRET_ACCESS_KEY: ZZ-AWS-SECRET-ACCESS-KEY
   # A session token is only required if you run DynamoDB from a starter ID.
-  # If you are running from a regular AWS ID, delete the next line
+  # If you are running from a regular AWS ID, the next line will be deleted by the template tool
   AWS_SESSION_TOKEN: ZZ-AWS-SESSION-TOKEN
