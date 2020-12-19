@@ -40,8 +40,8 @@ class ReadTablesSim extends Simulation {
     .acceptLanguageHeader("en-US,en;q=0.5")
 
   val scnReadTables = scenario("ReadTables")
-    .exec(RMusic.rmusic)
     .exec(RUser.ruser)
+    .exec(RMusic.rmusic)
 
   setUp(
     //scnReadTables.inject(constantUsersPerSec(1) during(120 seconds))
