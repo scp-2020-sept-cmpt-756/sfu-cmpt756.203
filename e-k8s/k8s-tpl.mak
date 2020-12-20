@@ -53,7 +53,7 @@ appns:
 	# Appended "|| true" so that make continues even when command fails
 	# because namespace already exists
 	$(KC) create ns $(APP_NS) || true
-	$(KC) label namespace $(APP_NS) istio-injection=enabled
+	$(KC) label namespace $(APP_NS) --overwrite=true istio-injection=enabled
 
 monitoring: monvs
 	$(KC) -n $(ISTIO_NS) get vs
@@ -64,15 +64,15 @@ gw: cluster/service-gateway.yaml
 monvs: cluster/monitoring-virtualservice.yaml
 	$(KC) -n $(ISTIO_NS) apply -f $< > $(LOG_DIR)/monvs.log
 
-s1: cluster/s1.yaml s1-build cluster/s1-sm.yaml
+s1: cluster/s1.yaml $(LOG_DIR)/s1.repo.log cluster/s1-sm.yaml
 	$(KC) -n $(APP_NS) apply -f $< > $(LOG_DIR)/s1.log
 	$(KC) -n $(APP_NS) apply -f cluster/s1-sm.yaml >> $(LOG_DIR)/s1.log
 
-s2: cluster/s2.yaml s2-build cluster/s2-sm.yaml
+s2: cluster/s2.yaml $(LOG_DIR)/s2.repo.log cluster/s2-sm.yaml
 	$(KC) -n $(APP_NS) apply -f $< > $(LOG_DIR)/s2.log
 	$(KC) -n $(APP_NS) apply -f cluster/s2-sm.yaml >> $(LOG_DIR)/s2.log
 
-db: cluster/db.yaml db-build cluster/db-sm.yaml cluster/awscred.yaml
+db: cluster/db.yaml $(LOG_DIR)/db.repo.log cluster/db-sm.yaml cluster/awscred.yaml
 	$(KC) -n $(APP_NS) apply -f cluster/awscred.yaml > $(LOG_DIR)/db.log
 	$(KC) -n $(APP_NS) apply -f $< >> $(LOG_DIR)/db.log
 	$(KC) -n $(APP_NS) apply -f cluster/db-sm.yaml >> $(LOG_DIR)/db.log
@@ -124,21 +124,21 @@ image: showcontext
 #
 # the s1 service
 #
-s1-build: s1/Dockerfile s1/app.py s1/requirements.txt
+$(LOG_DIR)/s1.repo.log: s1/Dockerfile s1/app.py s1/requirements.txt
 	$(DK) build -t $(CREG)/$(REGID)/cmpt756s1:latest s1 | tee $(LOG_DIR)/s1.img.log
 	$(DK) push $(CREG)/$(REGID)/cmpt756s1:latest | tee $(LOG_DIR)/s1.repo.log
 
 #
 # the s2 service
 #
-s2-build: s2/Dockerfile s2/app.py s2/requirements.txt
+$(LOG_DIR)/s2.repo.log: s2/Dockerfile s2/app.py s2/requirements.txt
 	$(DK) build -t $(CREG)/$(REGID)/cmpt756s2:latest s2 | tee $(LOG_DIR)/s2.img.log
 	$(DK) push $(CREG)/$(REGID)/cmpt756s2:latest | tee $(LOG_DIR)/s2.repo.log
 
 #
 # the db service
 #
-db-build: db/Dockerfile db/app.py db/requirements.txt
+$(LOG_DIR)/db.repo.log: db/Dockerfile db/app.py db/requirements.txt
 	$(DK) build -t $(CREG)/$(REGID)/cmpt756db:latest db | tee $(LOG_DIR)/db.img.log
 	$(DK) push $(CREG)/$(REGID)/cmpt756db:latest | tee $(LOG_DIR)/db.repo.log
 
