@@ -9,13 +9,19 @@ To create a fresh system that does not rely on any previous code:
 Create a new cluster in the appropriate system (Minikube, AWS, Azure,
 GCP, ...).  See the instructions in the appropriate `*.mak` file.
 
-To create a brand new cluster `newfresh` in Minikube:
+* To create a brand new cluster `newfresh` in Minikube:
 
-Edit `mk.mak`, to set `CTX=newfresh`, then run
+  Edit `mk.mak`, to set `CTX=newfresh`, then run
 
-~~~
-$ make -f mk.mak start
-~~~
+  ~~~
+  $ make -f mk.mak start
+  ~~~
+
+* Azure:
+
+  ~~~
+  $ make -f az.mak start
+  ~~~
 
 ### 2. Instantiate the template files
 
@@ -113,32 +119,56 @@ the last three lines of output:
 $ make -f k8s.mak ls
 ~~~
 
-### 7. Test the new cluster
+### 7. Connect to the new cluster
 
 Start a connection to your cluster.  This will depend upon where it is
-running.  For Minikube, run
+running:
+
+* For Minikube
+
+  ~~~
+  $ minikube tunnel
+  ~~~
+
+  On macOS and Linux, you may be asked to enter your machine's
+  userid. Once the tunnel is running, it will not produce any output.
+  Control-C to close the connection when your session is completed.
+
+
+* For Azure: Nothing to do--the external IPs should already be created.
+
+* For AWS: ???
+
+* For GCP: ???
+
+Locate the extern IP address required to access the cluster by running:
 
 ~~~
-$ minikube tunnel
+$ kubectl get -n istio-system svc/istio-ingressgateway
 ~~~
 
-On macOS and Linux, you may be asked to enter your machine's
-userid. Once the tunnel is running, it will not produce any output.
-Control-C to close the connection when your session is completed.
+The `EXTERNAL-IP` is the address to use.
+
+### 8. Visualize the cluster graph
 
 First, ensure that all the monitoring infrastructure is running. In
-your browser, visit `http://HOST/kiali`, where `HOST` is the hostname
-or IP address of your cluster.  For Minikube, `minikube ip` will
-provide the IP address.
+your browser, visit `http://EXTERNALIP/kiali`, where `EXTERNALIP` is the
+or external IP address you located in the step above.
 
 You should see the Kiali home page.  If Kiali is not in the `Graph`
 pane, click on `Graph` in the top left menu.  You should see a graph
 that includes entries for the three services, `cmpt756s1`,
 `cmpt756s2`, and `cmpt756db`.  (The structure will vary.)
 
-Now run Gatling to send some requests to the microservices.  This
-Gatling script will make 10 reads to table `User`, followed by 200
-requests to table `Music`:
+### 9. Send traffic via Gatling
+
+Now run Gatling to send some requests to the microservices. In the
+script `gatling/simulations/proj756/ReadTables.scala`, locate the
+line `.baseUrl("http://127.0.0.1")`. Replace `127.0.0.1` with the
+cluster's external IP address and save the file.
+
+The Gatling script will make 10 reads to table `User`, followed by 200
+requests to table `Music`. Compile and run it with this single command:
 
 ~~~
 $ make -f k8s.mak -B gatling
@@ -158,3 +188,28 @@ display. The graph should have the same structure as the one in the
 system. After the Gatling script stops generating traffic, Kiali will
 disconnect `istio-ingressgateway` from the services because it is not
 sending any more requests to the services.
+
+### 10. (Reference) Querying Prometheus metrics
+
+If you wish to access Prometheus to query its metrics, you will need
+to locate its IP address. Run
+
+~~~
+$ kubectl get -n istio-system svc/prom-ingress
+~~~
+
+Enter the URL `http//EXTERNAL-IP:9090/` in your browser to access
+Prometheus.
+
+### 11. (Reference) Viewing Grafana dashboards
+
+If you wish to access Grafana to view dashboards, you will need
+to locate its IP address. Run
+
+~~~
+$ kubectl get -n istio-system svc/grafana-ingress
+~~~
+
+Enter the URL `http//EXTERNAL-IP:3000/` in your browser to access
+Grafana.  You will need to sign in with userid `admin` and password
+`prom-operator`.

@@ -38,7 +38,8 @@ CTX=az756
 NTYPE=Standard_A2_v2
 REGION=canadacentral
 # use $(AKS) get-versions --location $(REGION) to find available versions
-KVER=1.19.0
+# This version is supported for canadacentral
+KVER=1.19.3
 
 #
 # Note that get-credentials fetches the access credentials for the managed Kubernetes cluster and inserts it
@@ -56,10 +57,6 @@ start: showcontext
 	$(AZ) group create --name $(GRP) --location $(REGION) | tee -a $(LOG_DIR)/az-cluster.log
 	$(AKS) create --resource-group $(GRP) --name $(CLUSTERNAME) --kubernetes-version $(KVER) --node-count 2 --node-vm-size $(NTYPE) --generate-ssh-keys | tee -a $(LOG_DIR)/az-cluster.log
 	$(AKS) get-credentials --resource-group $(GRP) --name $(CLUSTERNAME) | tee -a $(LOG_DIR)/az-cluster.log
-	cp ~/.ssh/id_rsa az-cluster-public-key
-	cat az-cluster-public-key | tee -a $(LOG_DIR)/az-cluster.log
-	cp ~/.ssh/id_rsa.pub az-cluster-private-key
-	cat az-cluster-private-key | tee -a $(LOG_DIR)/az-cluster.log
 	$(AKS) list | tee -a $(LOG_DIR)/az-cluster.log
 	date | tee -a $(LOG_DIR)/az-cluster.log
 
