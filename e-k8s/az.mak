@@ -52,7 +52,7 @@ KVER=1.19.0
 # But they're not available in the canadacentral region as of Oct 2020
 #
 start: showcontext
-	date | tee az-cluster.log
+	date | tee  $(LOG_DIR)/az-cluster.log
 	$(AZ) group create --name $(GRP) --location $(REGION) | tee -a $(LOG_DIR)/az-cluster.log
 	$(AKS) create --resource-group $(GRP) --name $(CLUSTERNAME) --kubernetes-version $(KVER) --node-count 2 --node-vm-size $(NTYPE) --generate-ssh-keys | tee -a $(LOG_DIR)/az-cluster.log
 	$(AKS) get-credentials --resource-group $(GRP) --name $(CLUSTERNAME) | tee -a $(LOG_DIR)/az-cluster.log
