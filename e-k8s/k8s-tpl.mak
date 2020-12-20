@@ -153,6 +153,13 @@ dynamodb: cluster/cloudformationdynamodb.json
 	$(AWS) cloudformation create-stack --stack-name db --template-body file://$<
 
 #
+# Login to the container registry
+#
+registry-login:
+	# Use '@' to suppress echoing the $CR_PAT to screen
+	@/bin/sh -c 'echo ${CR_PAT} | $(DK) login $(CREG) -u $(REGID) --password-stdin'
+
+#
 # Gatling
 #
 gatling: $(SIM_PACKAGE_DIR)/$(SIM_FILE)
