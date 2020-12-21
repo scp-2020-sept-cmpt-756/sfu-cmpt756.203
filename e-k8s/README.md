@@ -33,14 +33,25 @@ GCP, ...).  See the instructions in the appropriate `*.mak` file.
 
   This can take 15--30 minutes.
 
+* GCP:
+
+  ~~~
+  $ make -f gcp.mak start
+  ~~~
+
 ### 2. Instantiate the template files
 
-You must specify the required values in `cluster/tpl-vars.txt`.  These
-include things like your AWS keys, your GitHub signon, and other
-identifying information.  See the comments in that file for
-details. Note that you will need to have installed Gatling
+#### Fill in the required values in the template variable file
+
+Copy the file `cluster/tpl-vars-blank.txt` to `cluster/tpl-vars.txt`
+and fill in all the required values in `tpl-vars.txt`.  These include
+things like your AWS keys, your GitHub signon, and other identifying
+information.  See the comments in that file for details. Note that you
+will need to have installed Gatling
 (https://gatling.io/open-source/start-testing/) first, because you
 will be entering its path in `tpl-vars.txt`.
+
+#### Instantiate the templates
 
 Once you have filled in all the details, run
 
