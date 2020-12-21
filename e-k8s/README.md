@@ -23,6 +23,16 @@ GCP, ...).  See the instructions in the appropriate `*.mak` file.
   $ make -f az.mak start
   ~~~
 
+  This can take up to 15 minutes.
+
+* AWS:
+
+  ~~~
+  $ make -f eks.mak start
+  ~~~
+
+  This can take 15--30 minutes.
+
 ### 2. Instantiate the template files
 
 You must specify the required values in `cluster/tpl-vars.txt`.  These
@@ -137,17 +147,20 @@ running:
 
 * For Azure: Nothing to do--the external IPs should already be created.
 
-* For AWS: ???
+* For AWS: Nothing to do--the external IPs should already be created.
 
 * For GCP: ???
 
-Locate the extern IP address required to access the cluster by running:
+Locate the external IP address required to access the cluster by running:
 
 ~~~
 $ kubectl get -n istio-system svc/istio-ingressgateway
 ~~~
 
-The `EXTERNAL-IP` is the address to use.
+The `EXTERNAL-IP` is the address to use.  For Minikube and Azure, this
+will be an IP address like `52.228.115.161`, while for Amazon it will
+be a longer string such as 
+`a608432bedf3c4f5ae7430d8c3a75ebc-412518752.us-west-2.elb.amazonaws.com`.
 
 ### 8. Visualize the cluster graph
 
@@ -185,14 +198,44 @@ display. The graph should have the same structure as the one in the
 [Kiali sample graph](cluster/Kiali-sample-graph.png).
 
 **Note:** Kiali displays the real-time traffic through the
-system. After the Gatling script stops generating traffic, Kiali will
-disconnect `istio-ingressgateway` from the services because it is not
-sending any more requests to the services.
+system. Some time after the Gatling script stops generating traffic,
+Kiali will disconnect `istio-ingressgateway` from the services because
+it is not sending any more requests to the services.
 
-### 10. (Reference) Querying Prometheus metrics
+### 10. Delete the cluster
+
+Once you have completed your activities, you will likely want to
+delete the cluster.  Minikube consumes a lot of your machine as it
+runs, while Azure, AWS, and GCP charge you by the hour.
+
+* Minikube:
+
+  ~~~
+  $ make -f mk.mak stop
+  ~~~
+
+* Azure:
+
+  ~~~
+  $ make -f az.mak stop
+  ~~~
+
+* AWS:
+
+  ~~~
+  $ make -f eks.mak stop
+  ~~~
+
+* GCP:
+
+  ~~~
+  $ make -f gcp.mak stop
+  ~~~
+
+### 11. (Reference) Querying Prometheus metrics
 
 If you wish to access Prometheus to query its metrics, you will need
-to locate its IP address. Run
+to locate its EXTERNAL-IP address. Run
 
 ~~~
 $ kubectl get -n istio-system svc/prom-ingress
@@ -201,10 +244,10 @@ $ kubectl get -n istio-system svc/prom-ingress
 Enter the URL `http//EXTERNAL-IP:9090/` in your browser to access
 Prometheus.
 
-### 11. (Reference) Viewing Grafana dashboards
+### 12. (Reference) Viewing Grafana dashboards
 
 If you wish to access Grafana to view dashboards, you will need
-to locate its IP address. Run
+to locate its EXTERNAL-IP address. Run
 
 ~~~
 $ kubectl get -n istio-system svc/grafana-ingress

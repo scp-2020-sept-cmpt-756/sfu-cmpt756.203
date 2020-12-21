@@ -30,8 +30,8 @@ CTX=aws756
 
 NGROUP=worker-nodes
 NTYPE=t2.medium
-REGION=us-east-1
-KVER=1.17
+REGION=ZZ-AWS-REGION
+KVER=1.18
 
 
 start: showcontext
