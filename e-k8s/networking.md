@@ -259,3 +259,20 @@ The `kube-prometheus-stack` does *not* install this.
 
 Envoy proxy.  To debug routing problems, inspect the proxy logs for
 the service endpoint.  [Format of Envoy access logs](https://www.envoyproxy.io/docs/envoy/latest/configuration/observability/access_log/usage)
+
+## Grafana dependency of kube-prometheus-stack
+
+If you want to override the defaults of Grafana, you cannot simply
+specify something at the top level `values.yaml` of the Helm chart. In
+particular, you might want to specify that Grafana is pulled from a
+different hub than Docker Hub, which throttles accesses.
+
+The
+[`Chart.yaml`](https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/Chart.yaml)
+for `kube-prometheus-stack` specifies Grafana as a dependency at
+[`https://grafana.github.io/helm-charts`](https://grafana.github.io/helm-charts).
+
+The [`README.md`] of the Grafana repo lists `image.repository` as specifying
+the source of the image to be pulled, the Docker Hub image
+`grafana/grafana`.  However, the `image.pullPolicy` is `IfNotPresent`,
+so the pull will only be done the first time a cluster is started.
