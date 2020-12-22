@@ -1,5 +1,5 @@
-logs
 k8s.mak
 eks.mak
 docker.mak
+gcp.mak
 api.mak

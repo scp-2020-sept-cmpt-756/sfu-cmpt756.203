@@ -39,6 +39,8 @@ GCP, ...).  See the instructions in the appropriate `*.mak` file.
   $ make -f gcp.mak start
   ~~~
 
+  This can take over 10--15 minutes.
+
 ### 2. Instantiate the template files
 
 #### Fill in the required values in the template variable file
@@ -160,7 +162,7 @@ running:
 
 * For AWS: Nothing to do--the external IPs should already be created.
 
-* For GCP: ???
+* For GCP: Nothing to do--the external IPs should already be created.
 
 Locate the external IP address required to access the cluster by running:
 
