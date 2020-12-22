@@ -65,7 +65,7 @@ stop:
 	$(AKS) delete --name $(CLUSTERNAME) --resource-group $(GRP) -y --no-wait | tee $(LOG_DIR)/aks-stop.log
 
 status: showcontext
-	$(AKS) list | tee $(LOG_DIR)/eks-status.log
+	$(AKS) list | tee $(LOG_DIR)/aks-status.log
 
 dashboard: showcontext
 	echo Please follow instructions at https://docs.aws.amazon.com/eks/latest/userguide/dashboard-tutorial.html
