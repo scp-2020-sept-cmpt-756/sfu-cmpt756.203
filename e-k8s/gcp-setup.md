@@ -17,8 +17,9 @@ organization to its default "No Organization".
 ## 3. Enable the Containers API for your project
 
 Select the project you created.  Then
-[enable the `container.googleapis.com` API](https://console.cloud.google.com/apis/api/container.googleapis.com/overview)
-for that project.
+[enable the Kubernetes Engine API](https://console.cloud.google.com/apis/api/container.googleapis.com/overview)
+(confusingly called `container.googleapis.com` in the URLs) for that
+project.
 
 ## 4. Install the gcloud command-line interface
 
