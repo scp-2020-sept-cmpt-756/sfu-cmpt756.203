@@ -164,4 +164,25 @@ registry-login:
 # Gatling
 #
 gatling: $(SIM_PACKAGE_DIR)/$(SIM_FILE)
-	JAVA_HOME=$(JAVA_HOME) $(GAT) -rsf gatling/resources -sf $(SIM_DIR) -bf $(GAT_DIR)/target/test-classes -s $(SIM_FULL_NAME) -rd 'Run command'
+	JAVA_HOME=$(JAVA_HOME) $(GAT) -rsf gatling/resources -sf $(SIM_DIR) -bf $(GAT_DIR)/target/test-classes -s $(SIM_FULL_NAME) -rd "Simulation $(SIM_NAME)"
+
+#
+# Provision the entire stack
+#
+# Preconditions:
+# 1. Current context is a running Kubernetes cluster (make -f *.mak start)
+# 2. Templates have been instantiated (make -f k8s-tpl.mak templates)
+# 3. Path to kube-stack Helm chart added to Helm (make -f obs.mak init-helm)
+#
+# THIS IS BETA AND MAY NOT WORK IN ALL CASES
+#
+provision: istio prom kiali deploy
+
+prom:
+	make -f obs.mak install-prom
+
+kiali:
+	make -f obs.mak install-kiali
+	# Kiali operator can take awhile to start Kiali
+	tools/waiteq.sh 'app=kiali' '{.items[*]}'              ''        'Kiali' 'Created'
+	tools/waitne.sh 'app=kiali' '{.items[0].status.phase}' 'Running' 'Kiali' 'Running'
