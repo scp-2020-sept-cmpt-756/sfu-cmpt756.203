@@ -1,13 +1,25 @@
-from flask import Flask
-import requests
-import sys
+"""
+SFU CMPT 756
+Sample application---music service.
+"""
+
+# Standard library modules
 import logging
-import simplejson as json
-import urllib
+import sys
+
+# Installed packages
+from flask import Blueprint
+from flask import Flask
 from flask import request
 from flask import Response
-from flask import Blueprint
+
 from prometheus_flask_exporter import PrometheusMetrics
+
+import requests
+
+import simplejson as json
+
+# The application
 
 app = Flask(__name__)
 
@@ -23,59 +35,86 @@ db = {
     ]
 }
 bp = Blueprint('app', __name__)
+
+
 @bp.route('/health')
+@metrics.do_not_track()
 def health():
     return Response("", status=200, mimetype="application/json")
 
+
 @bp.route('/readiness')
+@metrics.do_not_track()
 def readiness():
     return Response("", status=200, mimetype="application/json")
+
 
 @bp.route('/', methods=['GET'])
 def list_all():
     headers = request.headers
     # check header here
     if 'Authorization' not in headers:
-        return Response(json.dumps({"error": "missing auth"}), status=401, mimetype='application/json')
+        return Response(json.dumps({"error": "missing auth"}),
+                        status=401,
+                        mimetype='application/json')
     # list all songs here
     return {}
+
 
 @bp.route('/<music_id>', methods=['GET'])
 def get_song(music_id):
     headers = request.headers
     # check header here
     if 'Authorization' not in headers:
-        return Response(json.dumps({"error": "missing auth"}), status=401, mimetype='application/json')
+        return Response(json.dumps({"error": "missing auth"}),
+                        status=401,
+                        mimetype='application/json')
     payload = {"objtype": "music", "objkey": music_id}
     url = db['name'] + '/' + db['endpoint'][0]
-    response = requests.get(url, params = payload, headers = {'Authorization': headers['Authorization']})
+    response = requests.get(
+        url,
+        params=payload,
+        headers={'Authorization': headers['Authorization']})
     return (response.json())
+
 
 @bp.route('/', methods=['POST'])
 def create_song():
     headers = request.headers
     # check header here
     if 'Authorization' not in headers:
-        return Response(json.dumps({"error": "missing auth"}), status=401, mimetype='application/json')
+        return Response(json.dumps({"error": "missing auth"}),
+                        status=401,
+                        mimetype='application/json')
     try:
         content = request.get_json()
         Artist = content['Artist']
         SongTitle = content['SongTitle']
-    except: 
+    except Exception:
         return json.dumps({"message": "error reading arguments"})
     url = db['name'] + '/' + db['endpoint'][1]
-    response = requests.post(url, json = {"objtype": "music", "Artist":Artist, "SongTitle": SongTitle}, headers = {'Authorization': headers['Authorization']})
+    response = requests.post(
+        url,
+        json={"objtype": "music", "Artist": Artist, "SongTitle": SongTitle},
+        headers={'Authorization': headers['Authorization']})
     return (response.json())
+
 
 @bp.route('/<music_id>', methods=['DELETE'])
 def delete_song(music_id):
     headers = request.headers
     # check header here
     if 'Authorization' not in headers:
-        return Response(json.dumps({"error": "missing auth"}), status=401, mimetype='application/json')
+        return Response(json.dumps({"error": "missing auth"}),
+                        status=401,
+                        mimetype='application/json')
     url = db['name'] + '/' + db['endpoint'][2]
-    response = requests.delete(url, params = { "objtype": "music", "objkey": music_id}, headers = {'Authorization': headers['Authorization']})
+    response = requests.delete(
+        url,
+        params={"objtype": "music", "objkey": music_id},
+        headers={'Authorization': headers['Authorization']})
     return (response.json())
+
 
 # All database calls will have this prefix.  Prometheus metric
 # calls will not---they will have route '/metrics'.  This is
