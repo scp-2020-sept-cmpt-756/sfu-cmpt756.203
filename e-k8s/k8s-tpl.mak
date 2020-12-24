@@ -32,7 +32,8 @@ SIM_DIR=gatling/simulations
 SIM_PACKAGE=proj756
 SIM_PACKAGE_DIR=$(SIM_DIR)/$(SIM_PACKAGE)
 SIM_FILE=ReadTables.scala
-SIM_NAME=$(SIM_PACKAGE).ReadTablesSim
+SIM_NAME=ReadUserSim
+SIM_FULL_NAME=$(SIM_PACKAGE).$(SIM_NAME)
 
 # these might need to change
 APP_NS=c756ns
@@ -163,4 +164,4 @@ registry-login:
 # Gatling
 #
 gatling: $(SIM_PACKAGE_DIR)/$(SIM_FILE)
-	JAVA_HOME=$(JAVA_HOME) $(GAT) -rsf gatling/resources -sf $(SIM_DIR) -bf $(GAT_DIR)/target/test-classes -s $(SIM_NAME) -rd 'Run command'
+	JAVA_HOME=$(JAVA_HOME) $(GAT) -rsf gatling/resources -sf $(SIM_DIR) -bf $(GAT_DIR)/target/test-classes -s $(SIM_FULL_NAME) -rd 'Run command'

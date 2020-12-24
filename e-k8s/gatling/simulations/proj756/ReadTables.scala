@@ -9,7 +9,7 @@ object RMusic {
 
   val feeder = csv("music.csv").eager.random
 
-  val rmusic = repeat(200, "i") {
+  val rmusic = forever("i") {
     feed(feeder)
     .exec(http("RMusic ${i}")
       .get("/api/v1/music/${UUID}"))
@@ -22,7 +22,7 @@ object RUser {
 
   val feeder = csv("users.csv").eager.circular
 
-  val ruser = repeat(20, "i") {
+  val ruser = forever("i") {
     feed(feeder)
     .exec(http("RUser ${i}")
       .get("/api/v1/user/${UUID}"))
@@ -31,20 +31,67 @@ object RUser {
 
 }
 
+/*
+  Attempt to interleave reads from User and Music tables.
+  The Gatling EDSL only honours the second (Music) read,
+  ignoring the first read of User. [Shrug-emoji] 
+ */
+object RBoth {
+
+  val u_feeder = csv("users.csv").eager.circular
+  val m_feeder = csv("music.csv").eager.random
+
+  val rboth = forever("i") {
+    feed(u_feeder)
+    .exec(http("RUser ${i}")
+      .get("/api/v1/user/${UUID}"))
+    .pause(1);
+
+    feed(m_feeder)
+    .exec(http("RMusic ${i}")
+      .get("/api/v1/music/${UUID}"))
+      .pause(1)
+  }
+
+}
+
 class ReadTablesSim extends Simulation {
 
   val httpProtocol = http
-    .baseUrl("http://127.0.0.1:80")
+    .baseUrl("http://127.0.0.1/")
     .acceptHeader("application/json,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
     .authorizationHeader("Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiZGJmYmMxYzAtMDc4My00ZWQ3LTlkNzgtMDhhYTRhMGNkYTAyIiwidGltZSI6MTYwNzM2NTU0NC42NzIwNTIxfQ.zL4i58j62q8mGUo5a0SQ7MHfukBUel8yl8jGT5XmBPo")
     .acceptLanguageHeader("en-US,en;q=0.5")
+}
 
-  val scnReadTables = scenario("ReadTables")
-    .exec(RUser.ruser)
+class ReadUserSim extends ReadTablesSim {
+  val scnReadUser = scenario("ReadUser")
+      .exec(RUser.ruser)
+
+  setUp(
+    scnReadUser.inject(atOnceUsers(1))
+  ).protocols(httpProtocol)
+}
+
+class ReadMusicSim extends ReadTablesSim {
+  val scnReadMusic = scenario("ReadMusic")
     .exec(RMusic.rmusic)
 
   setUp(
-    //scnReadTables.inject(constantUsersPerSec(1) during(120 seconds))
-    scnReadTables.inject(atOnceUsers(1))
+    scnReadMusic.inject(atOnceUsers(1))
+  ).protocols(httpProtocol)
+}
+
+/*
+  This doesn't work---it just reads the Music table.
+  We left it in here as possible inspiration for other work
+  (or a warning that this approach will fail).
+ */
+class ReadBothSim extends ReadTablesSim {
+  val scnReadBoth = scenario("ReadBoth")
+    .exec(RBoth.rboth)
+
+  setUp(
+    scnReadBoth.inject(atOnceUsers(1))
   ).protocols(httpProtocol)
 }
