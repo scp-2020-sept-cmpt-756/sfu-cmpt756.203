@@ -5,6 +5,29 @@ import scala.concurrent.duration._
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
 
+object Utility {
+  /*
+    Utility to get an Int from an environment variable.
+    Return defInt if the environment var does not exist
+    or cannot be converted to a string.
+  */
+  def envVarToInt(ev: String, defInt: Int): Int = {
+    try {
+      sys.env(ev).toInt
+    } catch {
+      case e: Exception => defInt
+    }
+  }
+
+  /*
+    Utility to get an environment variable.
+    Return defStr if the environment var does not exist.
+  */
+  def envVar(ev: String, defStr: String): String = {
+    sys.env.getOrElse(ev, defStr)
+  }
+}
+
 object RMusic {
 
   val feeder = csv("music.csv").eager.random
@@ -32,7 +55,7 @@ object RUser {
 }
 
 /*
-  Attempt to interleave reads from User and Music tables.
+  Failed attempt to interleave reads from User and Music tables.
   The Gatling EDSL only honours the second (Music) read,
   ignoring the first read of User. [Shrug-emoji] 
  */
@@ -55,10 +78,10 @@ object RBoth {
 
 }
 
+// Get Cluster IP from CLUSTER_IP environment variable or default to 127.0.0.1 (Minikube)
 class ReadTablesSim extends Simulation {
-
   val httpProtocol = http
-    .baseUrl("http://127.0.0.1/")
+    .baseUrl("http://" + Utility.envVar("CLUSTER_IP", "127.0.0.1") + "/")
     .acceptHeader("application/json,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
     .authorizationHeader("Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiZGJmYmMxYzAtMDc4My00ZWQ3LTlkNzgtMDhhYTRhMGNkYTAyIiwidGltZSI6MTYwNzM2NTU0NC42NzIwNTIxfQ.zL4i58j62q8mGUo5a0SQ7MHfukBUel8yl8jGT5XmBPo")
     .acceptLanguageHeader("en-US,en;q=0.5")
@@ -69,7 +92,7 @@ class ReadUserSim extends ReadTablesSim {
       .exec(RUser.ruser)
 
   setUp(
-    scnReadUser.inject(atOnceUsers(1))
+    scnReadUser.inject(atOnceUsers(Utility.envVarToInt("USERS", 1)))
   ).protocols(httpProtocol)
 }
 
@@ -78,7 +101,7 @@ class ReadMusicSim extends ReadTablesSim {
     .exec(RMusic.rmusic)
 
   setUp(
-    scnReadMusic.inject(atOnceUsers(1))
+    scnReadMusic.inject(atOnceUsers(Utility.envVarToInt("USERS", 1)))
   ).protocols(httpProtocol)
 }
 
@@ -87,6 +110,7 @@ class ReadMusicSim extends ReadTablesSim {
   We left it in here as possible inspiration for other work
   (or a warning that this approach will fail).
  */
+/*
 class ReadBothSim extends ReadTablesSim {
   val scnReadBoth = scenario("ReadBoth")
     .exec(RBoth.rboth)
@@ -95,3 +119,4 @@ class ReadBothSim extends ReadTablesSim {
     scnReadBoth.inject(atOnceUsers(1))
   ).protocols(httpProtocol)
 }
+*/
