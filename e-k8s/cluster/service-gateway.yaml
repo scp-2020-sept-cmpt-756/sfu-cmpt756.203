@@ -8,10 +8,10 @@
 #
 # Notes:
 #
-# 1. the Gateway's .spec.servers.port.number is where istio will serve the API.
+# 1. Gateway's .spec.servers.port.number is where istio will serve the API.
 #    This means that you can move the service around publically irrespective of
 #    the actual implementation.
-# 2. Deployment's .spec.http.match.uri & .rewrite.uri allows you to publish/implement
+# 2. VirtualService's .spec.http.match.uri & .rewrite.uri allows you to publish/implement
 #    a public API path while routing to a private/legacy path.
 #
 apiVersion: networking.istio.io/v1alpha3
