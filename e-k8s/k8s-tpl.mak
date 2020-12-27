@@ -173,13 +173,13 @@ gatling: $(SIM_PACKAGE_DIR)/$(SIM_FILE)
 # Preconditions:
 # 1. Current context is a running Kubernetes cluster (make -f *.mak start)
 # 2. Templates have been instantiated (make -f k8s-tpl.mak templates)
-# 3. Path to kube-stack Helm chart added to Helm (make -f obs.mak init-helm)
 #
 # THIS IS BETA AND MAY NOT WORK IN ALL CASES
 #
 provision: istio prom kiali deploy
 
 prom:
+	make -f obs.mak init-helm
 	make -f obs.mak install-prom
 
 kiali:
