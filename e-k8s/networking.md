@@ -276,3 +276,25 @@ The [`README.md`] of the Grafana repo lists `image.repository` as specifying
 the source of the image to be pulled, the Docker Hub image
 `grafana/grafana`.  However, the `image.pullPolicy` is `IfNotPresent`,
 so the pull will only be done the first time a cluster is started.
+
+## Loading Grafana dashboards
+
+To load a Grafana dashboard into the cluster, create a `ConfigMap`
+with a label `grafana_dashboard` that has any value (typically `"1"`,
+though that is not required).  See the example at
+`clusters/grafana-flask-configmap.yaml`.
+
+### How locally-installed dashboards are discovered and loaded
+
+The Grafana installation includes a pod sidecar,
+`kiwigrid/k8s-sidecar`. This sidecar regularly scans every `ConfigMap`
+in the system. If a `ConfigMap` has the label `grafana_dashboard`, it
+is loaded.
+
+## Other tools
+
+[Fortio load tester](https://github.com/fortio/fortio) Developed as
+part of Istio.
+
+[Flask-OpenTracing](https://github.com/opentracing-contrib/python-flask)
+library for producing OpenTracing data (used by tools such as Jaeger).
