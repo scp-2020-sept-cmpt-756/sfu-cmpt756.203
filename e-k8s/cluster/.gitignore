@@ -4,5 +4,6 @@ s2.yaml
 db-nohealth.yaml
 s1-nohealth.yaml
 s2-nohealth.yaml
+dynamodb-service-entry.yaml
 awscred.yaml
 tpl-vars.txt
