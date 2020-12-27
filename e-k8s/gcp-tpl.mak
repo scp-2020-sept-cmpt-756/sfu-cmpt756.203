@@ -51,9 +51,10 @@ start:
 	      --scopes "https://www.googleapis.com/auth/devstorage.read_only","https://www.googleapis.com/auth/logging.write","https://www.googleapis.com/auth/monitoring","https://www.googleapis.com/auth/servicecontrol","https://www.googleapis.com/auth/service.management.readonly","https://www.googleapis.com/auth/trace.append" \
 	      --no-enable-stackdriver-kubernetes \
 	      --addons HorizontalPodAutoscaling,HttpLoadBalancing \
-	      --enable-ip-alias --no-enable-master-authorized-networks --enable-shielded-nodes | tee -a $(LOG_DIR)/gcp-cluster.log
+	      --enable-ip-alias --no-enable-master-authorized-networks --enable-shielded-nodes \
+	      --default-max-pods-per-node "110" --enable-autoupgrade --enable-autorepair --max-surge-upgrade 1 --max-unavailable-upgrade 0 | tee -a $(LOG_DIR)/gcp-cluster.log
 	      # These options were in original Google version but do not seem necessary for this project
-	      #--network "projects/c756proj/global/networks/default" --subnetwork "projects/c756proj/regions/us-west1/subnetworks/default" --default-max-pods-per-node "110" --enable-autoupgrade --enable-autorepair --max-surge-upgrade 1 --max-unavailable-upgrade 0
+	      #--network "projects/c756proj/global/networks/default" --subnetwork "projects/c756proj/regions/us-west1/subnetworks/default"
 
 
 get-credentials:
