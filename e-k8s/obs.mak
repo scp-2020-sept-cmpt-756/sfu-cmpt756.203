@@ -41,7 +41,7 @@ init-helm:
 install-prom:
 	echo $(HELM) install $(RELEASE) --namespace $(ISTIO_NS) prometheus-community/kube-prometheus-stack > $(LOG_DIR)/obs-install-prometheus.log
 	$(HELM) install $(RELEASE) -f helm-kube-stack-values.yaml --namespace $(ISTIO_NS) prometheus-community/kube-prometheus-stack | tee -a $(LOG_DIR)/obs-install-prometheus.log
-	$(KC) apply -n $(ISTIO_NS) -f monitoring-lb-services.yaml | tee $(LOG_DIR)/obs-install-prometheus.log
+	$(KC) apply -n $(ISTIO_NS) -f monitoring-lb-services.yaml | tee -a $(LOG_DIR)/obs-install-prometheus.log
 
 uninstall-prom:
 	echo $(HELM) uninstall $(RELEASE) --namespace $(ISTIO_NS) > $(LOG_DIR)/obs-uninstall-prometheus.log
