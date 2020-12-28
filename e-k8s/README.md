@@ -85,6 +85,11 @@ $ aws dynamodb list-tables
 
 The resulting output should include tables `User` and `Music`.
 
+----
+
+**All the remaining steps can now be accomplished with the single
+  command `make -f k8s.mak provision`.**
+
 ### 4. Install the Istio service mesh
 
 Your cluster is currently running bare Kubernetes. The next steps will
