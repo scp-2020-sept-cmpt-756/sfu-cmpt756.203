@@ -9,9 +9,9 @@ To create a fresh system that does not rely on any previous code:
 Create a new cluster in the appropriate system (Minikube, AWS, Azure,
 GCP, ...).  See the instructions in the appropriate `*.mak` file.
 
-* To create a brand new cluster `newfresh` in Minikube:
+To create a brand new cluster in:
 
-  Edit `mk.mak`, to set `CTX=newfresh`, then run
+* Minikube:
 
   ~~~
   $ make -f mk.mak start
