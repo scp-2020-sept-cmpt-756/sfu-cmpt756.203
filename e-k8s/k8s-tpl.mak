@@ -78,7 +78,7 @@ db: cluster/db.yaml $(LOG_DIR)/db.repo.log cluster/db-sm.yaml cluster/awscred.ya
 	$(KC) -n $(APP_NS) apply -f cluster/awscred.yaml > $(LOG_DIR)/db.log
 	$(KC) -n $(APP_NS) apply -f $< >> $(LOG_DIR)/db.log
 	$(KC) -n $(APP_NS) apply -f cluster/db-sm.yaml >> $(LOG_DIR)/db.log
-	$(KC) -n $(APP_NS) apply -f cluster/cluster/dynamodb-service-entry.yaml >> $(LOG_DIR)/db.log
+	$(KC) -n $(APP_NS) apply -f cluster/dynamodb-service-entry.yaml >> $(LOG_DIR)/db.log
 
 health-off:
 	$(KC) -n $(APP_NS) apply -f cluster/s1-nohealth.yaml
