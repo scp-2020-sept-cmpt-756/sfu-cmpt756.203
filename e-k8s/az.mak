@@ -15,8 +15,8 @@
 # Where possible, stodout outputs are tee into .out files for later review.
 #
 
-AKS=az aks
 AZ=az
+AKS=$(AZ) aks
 KC=kubectl
 IC=istioctl
 
