@@ -88,11 +88,11 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "increase(flask_http_request_total[1m])",
+              "expr": "sum by (service) (increase(flask_http_request_total[1m]))",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "{{ job }}",
+              "legendFormat": "{{ service }}",
               "refId": "A"
             }
           ],
