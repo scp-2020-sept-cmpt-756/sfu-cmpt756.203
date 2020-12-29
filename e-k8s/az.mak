@@ -56,7 +56,7 @@ start: showcontext
 	date | tee  $(LOG_DIR)/az-cluster.log
 	$(AZ) group create --name $(GRP) --location $(REGION) | tee -a $(LOG_DIR)/az-cluster.log
 	$(AKS) create --resource-group $(GRP) --name $(CLUSTERNAME) --kubernetes-version $(KVER) --node-count 2 --node-vm-size $(NTYPE) --generate-ssh-keys | tee -a $(LOG_DIR)/az-cluster.log
-	$(AKS) get-credentials --resource-group $(GRP) --name $(CLUSTERNAME) | tee -a $(LOG_DIR)/az-cluster.log
+	$(AKS) get-credentials --resource-group $(GRP) --name $(CLUSTERNAME) --overwrite-existing | tee -a $(LOG_DIR)/az-cluster.log
 	$(AKS) list | tee -a $(LOG_DIR)/az-cluster.log
 	date | tee -a $(LOG_DIR)/az-cluster.log
 
