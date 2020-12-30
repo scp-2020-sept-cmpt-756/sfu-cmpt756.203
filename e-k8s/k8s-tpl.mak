@@ -35,6 +35,7 @@ SIM_FILE=ReadTables.scala
 SIM_NAME=ReadUserSim
 SIM_FULL_NAME=$(SIM_PACKAGE).$(SIM_NAME)
 GATLING_OPTIONS=
+USERS=1
 
 # these might need to change
 APP_NS=c756ns
@@ -163,16 +164,66 @@ registry-login:
 	@/bin/sh -c 'echo ${CR_PAT} | $(DK) login $(CREG) -u $(REGID) --password-stdin'
 
 #
+# Get the URLs for the services
+#
+# Utility to get the hostname (AWS) or ip (everyone else) of a load-balanced service
+# Must be followed by a service
+IP_GET_CMD=tools/getip.sh $(KC) $(ISTIO_NS)
+
+# This expression is reused several times
+# Use back-tick for subshell so as not to confuse with make $() variable notation
+INGRESS_IP=`$(IP_GET_CMD) svc/istio-ingressgateway`
+
+kiali-url:
+	@/bin/sh -c 'echo http://$(INGRESS_IP)/kiali'
+
+grafana-url:
+	@# Use back-tick for subshell so as not to confuse with make $() variable notation
+	@/bin/sh -c 'echo http://`$(IP_GET_CMD) svc/grafana-ingress`:3000/'
+
+prometheus-url:
+	@# Use back-tick for subshell so as not to confuse with make $() variable notation
+	@/bin/sh -c 'echo http://`$(IP_GET_CMD) svc/prom-ingress`:9090/'
+
+#
 # Gatling
 #
+# Suffix to all Gatling commands
+# 2>&1:       Redirect stderr to stdout. This ensures the long errors from a
+#             misnamed Gatling script are clipped
+# | head -18: Display first 18 lines, discard the rest
+# &:          Run in background
+GAT_SUFFIX=2>&1 | head -18 &
+#
+# General Gatling target: Specify CLUSTER_IP, USERS, and SIM_NAME as environment variables. Full output.
 gatling: $(SIM_PACKAGE_DIR)/$(SIM_FILE)
 	JAVA_HOME=$(JAVA_HOME) $(GAT) -rsf gatling/resources -sf $(SIM_DIR) -bf $(GAT_DIR)/target/test-classes -s $(SIM_FULL_NAME) -rd "Simulation $(SIM_NAME)" $(GATLING_OPTIONS)
+
+# The following should probably not be used---it starts the job but under most shells
+# this process will not be listed by the `jobs` command. This makes it difficult
+# to kill the process when you want to end the load test
+# Shortcut: Read from Music table on current cluster. Only specify USERS.
+gatling-music:
+	@/bin/sh -c 'CLUSTER_IP=$(INGRESS_IP) USERS=$(USERS) SIM_NAME=ReadMusicSim JAVA_HOME=$(JAVA_HOME) $(GAT) -rsf gatling/resources -sf $(SIM_DIR) -bf $(GAT_DIR)/target/test-classes -s $(SIM_FULL_NAME) -rd "Simulation $(SIM_NAME)" $(GATLING_OPTIONS) $(GAT_SUFFIX)'
+
+# Different approach from gatling-music but the same problems. Probably do not use this.
+# Shortcut: Read from User table on current cluster. Only specify USERS.
+gatling-user:
+	@/bin/sh -c 'CLUSTER_IP=$(INGRESS_IP) USERS=$(USERS) SIM_NAME=ReadUserSim make -e -f k8s.mak gatling $(GAT_SUFFIX)'
+
+# PREFERRED METHOD
+# Less convenient than gatling-music or gatling-user but the resulting commands
+# are listed by `jobs` and thus easy to kill.
+# This merely prints a suggested command that you must then copy into your
+# command line and edit, then submit
+gatling-command:
+	@/bin/sh -c 'echo "CLUSTER_IP=$(INGRESS_IP) USERS=1 SIM_NAME=ReadMusicSim make -e -f k8s.mak gatling $(GAT_SUFFIX)"'
 
 #
 # Provision the entire stack
 #
 # Preconditions:
-# 1. Current context is a running Kubernetes cluster (make -f *.mak start)
+# 1. Current context is a running Kubernetes cluster (make -f {az,eks,gcp,mk}.mak start)
 # 2. Templates have been instantiated (make -f k8s-tpl.mak templates)
 #
 # THIS IS BETA AND MAY NOT WORK IN ALL CASES
