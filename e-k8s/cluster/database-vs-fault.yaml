@@ -1,0 +1,23 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: c756db
+spec:
+  hosts:
+  - cmpt756db
+  http:
+  - match:
+    - uri:
+        prefix: /api/v1/datastore
+    rewrite:
+      uri: /api/v1/datastore
+    route:
+    - destination:
+        host: cmpt756db
+        port:
+          number: 30002
+    fault:
+      abort:
+        httpStatus: 500
+        percentage:
+          value: 10

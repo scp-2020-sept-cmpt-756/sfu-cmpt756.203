@@ -78,6 +78,7 @@ s2: cluster/s2.yaml $(LOG_DIR)/s2.repo.log cluster/s2-sm.yaml
 db: cluster/db.yaml $(LOG_DIR)/db.repo.log cluster/db-sm.yaml cluster/awscred.yaml
 	$(KC) -n $(APP_NS) apply -f cluster/awscred.yaml > $(LOG_DIR)/db.log
 	$(KC) -n $(APP_NS) apply -f $< >> $(LOG_DIR)/db.log
+	$(KC) -n $(APP_NS) apply -f cluster/database-vs.yaml >> $(LOG_DIR)/db.log
 	$(KC) -n $(APP_NS) apply -f cluster/db-sm.yaml >> $(LOG_DIR)/db.log
 	$(KC) -n $(APP_NS) apply -f cluster/dynamodb-service-entry.yaml >> $(LOG_DIR)/db.log
 
