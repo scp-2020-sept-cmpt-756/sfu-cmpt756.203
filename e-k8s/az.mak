@@ -57,7 +57,7 @@ start: showcontext
 	$(AZ) group create --name $(GRP) --location $(REGION) | tee -a $(LOG_DIR)/az-cluster.log
 	$(AKS) create --resource-group $(GRP) --name $(CLUSTERNAME) --kubernetes-version $(KVER) --node-count 2 --node-vm-size $(NTYPE) --generate-ssh-keys | tee -a $(LOG_DIR)/az-cluster.log
 	$(AKS) get-credentials --resource-group $(GRP) --name $(CLUSTERNAME) --overwrite-existing | tee -a $(LOG_DIR)/az-cluster.log
-	$(AKS) list | tee -a $(LOG_DIR)/az-cluster.log
+	$(AKS) list -o table | tee -a $(LOG_DIR)/az-cluster.log
 	date | tee -a $(LOG_DIR)/az-cluster.log
 
 
@@ -65,7 +65,7 @@ stop:
 	$(AKS) delete --name $(CLUSTERNAME) --resource-group $(GRP) -y --no-wait | tee $(LOG_DIR)/aks-stop.log
 
 status: showcontext
-	$(AKS) list | tee $(LOG_DIR)/aks-status.log
+	$(AKS) list -o table | tee $(LOG_DIR)/aks-status.log
 
 dashboard: showcontext
 	echo Please follow instructions at https://docs.aws.amazon.com/eks/latest/userguide/dashboard-tutorial.html
