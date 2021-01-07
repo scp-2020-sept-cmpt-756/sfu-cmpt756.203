@@ -1,10 +1,9 @@
 #
-# Janky front-end to bring some sanity (?) to the litany of tools and switches
-# in setting up, tearing down and validating your EKS cluster for working
-# with k8s and istio.
+# Front-end to bring some sanity to the litany of tools and switches
+# in setting up, tearing down and validating your EKS cluster.
 #
-# There is an intentional parallel between this makefile (eks.m for Minkube)
-# and the corresponding file for Minikube (mk.m). This makefile makes extensive
+# There is an intentional parallel between this makefile
+# and the corresponding file for Minikube (mk.mak). This makefile makes extensive
 # use of pseudo-target to automate the error-prone and tedious command-line
 # needed to get your environment up. There are some deviations between the
 # two due to irreconcilable differences between a private single-node
@@ -17,15 +16,14 @@
 
 EKS=eksctl
 KC=kubectl
-IC=istioctl
 
 # Keep all the logs out of main directory
 LOG_DIR=logs
 
 # these might need to change
 NS=c756ns
-CLUSTERNAME=aws756
-CTX=aws756
+CLUSTER_NAME=aws756
+EKS_CTX=aws756
 
 
 NGROUP=worker-nodes
@@ -35,62 +33,35 @@ KVER=1.18
 
 
 start: showcontext
-	$(EKS) create cluster --name $(CLUSTERNAME) --version $(KVER) --region $(REGION) --nodegroup-name $(NGROUP) --node-type $(NTYPE) --nodes 2 --nodes-min 2 --nodes-max 2 --managed | tee $(LOG_DIR)/eks-cluster.log
+	$(EKS) create cluster --name $(CLUSTER_NAME) --version $(KVER) --region $(REGION) --nodegroup-name $(NGROUP) --node-type $(NTYPE) --nodes 2 --nodes-min 2 --nodes-max 2 --managed | tee $(LOG_DIR)/eks-cluster.log
 	# Use back-ticks for subshell because $(...) notation is used by make
-	$(KC) config rename-context `$(KC) config current-context` $(CTX)
+	$(KC) config rename-context `$(KC) config current-context` $(EKS_CTX) | tee -a $(LOG_DIR)/eks-cluster.log
 
 stop:
-	$(EKS) delete cluster --name $(CLUSTERNAME) --region $(REGION) | tee $(LOG_DIR)/eks-delete.log
+	$(EKS) delete cluster --name $(CLUSTER_NAME) --region $(REGION) | tee $(LOG_DIR)/eks-delete.log
 
 up:
-	$(EKS) create nodegroup --cluster $(CLUSTERNAME) --region $(REGION) --name $(NGROUP) --node-type $(NTYPE) --nodes 2 --nodes-min 2 --nodes-min 2 --managed | tee $(LOG_DIR)/repl-nodes.log
+	$(EKS) create nodegroup --cluster $(CLUSTER_NAME) --region $(REGION) --name $(NGROUP) --node-type $(NTYPE) --nodes 2 --nodes-min 2 --nodes-min 2 --managed | tee $(LOG_DIR)/repl-nodes.log
 
 down:
-	$(EKS) delete nodegroup --cluster=$(CLUSTERNAME) --region $(REGION) --name=$(NGROUP)
-	rm $(LOG_DIR)/repl-nodes.log
+	$(EKS) delete nodegroup --cluster=$(CLUSTER_NAME) --region $(REGION) --name=$(NGROUP) | tee $(LOG_DIR)/repl-nodes.log
+
+# Show all AWS clusters
+# This currently duplicates target "status"
+ls: showcontext
+	$(EKS) get cluster --region $(REGION) | tee $(LOG_DIR)/eks-status.log
+	$(EKS) get nodegroup --cluster $(CLUSTER_NAME) --region $(REGION) | tee -a $(LOG_DIR)/eks-status.log
 
 status: showcontext
 	$(EKS) get cluster --region $(REGION) | tee $(LOG_DIR)/eks-status.log
-	$(EKS) get nodegroup --cluster $(CLUSTERNAME) --region $(REGION) | tee -a $(LOG_DIR)/eks-status.log
+	$(EKS) get nodegroup --cluster $(CLUSTER_NAME) --region $(REGION) | tee -a $(LOG_DIR)/eks-status.log
 
-dashboard: showcontext
-	echo Please follow instructions at https://docs.aws.amazon.com/eks/latest/userguide/dashboard-tutorial.html
-	echo Remember to 'pkill kubectl' when you are done!
-	$(KC) proxy &
-	open http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#!/login
-
-
-extern: showcontext
-	$(KC) -n istio-system get service istio-ingressgateway
-
+# Only two $(KC) command in a vendor-specific Makefile
+# Set context to latest EKS cluster
 cd:
-	$(KC) config use-context $(CTX)
+	$(KC) config use-context $(EKS_CTX)
 
-# show svc across all namespaces
-lsa: showcontext
-	$(KC) get svc --all-namespaces
-
-# show deploy and pods in current ns; svc of cmpt756 ns
-ls: showcontext
-	$(KC) get gw,deployments,pods
-	$(KC) -n $(NS) get svc
-
-# show containers across all pods
-lsd:
-	$(KC) get pods --all-namespaces -o=jsonpath='{range .items[*]}{"\n"}{.metadata.name}{":\t"}{range .spec.containers[*]}{.image}{", "}{end}{end}' | sort
-
-# reinstate all the pieces of istio on a new cluster
-# do this whenever you create/restart your cluster
-# NB: You must rename the long context name down to $(CTX) before using this
-reinstate:
-	$(KC) config use-context $(CTX) | tee -a $(LOG_DIR)/eks-reinstate.log
-	$(KC) create ns $(NS) | tee -a $(LOG_DIR)/eks-reinstate.log
-	$(KC) config set-context $(CTX) --namespace=$(NS) | tee -a $(LOG_DIR)/eks-reinstate.log
-	$(KC) label ns $(NS) istio-injection=enabled | tee -a $(LOG_DIR)/eks-reinstate.log
-	$(IC) install --set profile=demo | tee -a $(LOG_DIR)/eks-reinstate.log
-
-setupdashboard:
-	echo TODO
-	
+# Vendor-agnostic but subtarget of vendor-specific targets such as "start"
 showcontext:
 	$(KC) config get-contexts
+

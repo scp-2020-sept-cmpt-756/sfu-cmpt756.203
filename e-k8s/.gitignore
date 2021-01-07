@@ -1,5 +1,7 @@
 k8s.mak
 eks.mak
+az.mak
+mk.mak
 docker.mak
 gcp.mak
 api.mak

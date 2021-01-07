@@ -99,10 +99,15 @@ scratch: clean
 clean:
 	/bin/rm -f $(LOG_DIR)/{s1,s2,db,gw,monvs}.log
 
-extern: showcontext
-	$(KC) -n istio-system get svc istio-ingressgateway
+dashboard: showcontext
+	echo Please follow instructions at https://docs.aws.amazon.com/eks/latest/userguide/dashboard-tutorial.html
+	echo Remember to 'pkill kubectl' when you are done!
+	$(KC) proxy &
+	open http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#!/login
 
-# show svc across all namespaces
+extern: showcontext
+	$(KC) -n $(ISTIO_NS) get svc istio-ingressgateway
+
 lsa: showcontext
 	$(KC) get svc --all-namespaces
 
@@ -113,6 +118,13 @@ ls: showcontext
 # show containers across all pods
 lsd:
 	$(KC) get pods --all-namespaces -o=jsonpath='{range .items[*]}{"\n"}{.metadata.name}{":\t"}{range .spec.containers[*]}{.image}{", "}{end}{end}' | sort
+
+# Reinstate provisioning on a new set of worker nodes
+# Do this after you do `up` on a cluster that implements that operation
+reinstate:
+	$(KC) create ns $(APP_NS) | tee $(LOG_DIR)/reinstate.log
+	$(KC) label ns $(APP_NS) istio-injection=enabled | tee -a $(LOG_DIR)/reinstate.log
+	$(IC) install --set profile=demo | tee -a $(LOG_DIR)/reinstate.log
 
 cr:
 	$(DK) push $(CREG)/$(REGID)/cmpt756s1:latest | tee $(LOG_DIR)/s1.repo.log

@@ -1,7 +1,6 @@
 #
-# Janky front-end to bring some sanity (?) to the litany of tools and switches
-# in setting up, tearing down and validating your AKS cluster for working
-# with k8s and istio.
+# Front-end to bring some sanity to the litany of tools and switches
+# in setting up, tearing down and validating your GCP cluster.
 #
 # There is an intentional parallel between this makefile
 # and the corresponding file for Minikube or AWS. This makefile makes extensive
@@ -18,9 +17,13 @@
 GC=gcloud
 KC=kubectl
 
+# Keep all the logs out of main directory
+LOG_DIR=logs
+
 # these might need to change
 NS=c756ns
 CLUSTER_NAME=gcp756
+GCP_CTX=gcp756
 ZONE=us-west1-c
 SUBNET_NAME=c756subnet
 
@@ -31,14 +34,10 @@ DISK_TYPE="pd-standard"
 DISK_SIZE="32"
 NUM_NODES=3 # This was default for Google's "My First Cluster"
 
-
-# Keep all the logs out of main directory
-LOG_DIR=logs
-
 # This version is supported for us-west2
 KVER=1.19.3
 
-start:
+start:	showcontext
 	date | tee  $(LOG_DIR)/gcp-cluster.log
 	# This long list of options is the recommendation produced by Google's "My First Cluster"
 	# The lines up to and including "metadata" are required for 756.
@@ -55,44 +54,34 @@ start:
 	      --default-max-pods-per-node "110" --enable-autoupgrade --enable-autorepair --max-surge-upgrade 1 --max-unavailable-upgrade 0 | tee -a $(LOG_DIR)/gcp-cluster.log
 	      # These options were in original Google version but do not seem necessary for this project
 	      #--network "projects/c756proj/global/networks/default" --subnetwork "projects/c756proj/regions/us-west1/subnetworks/default"
-
-
-get-credentials:
-	$(GC) container clusters get-credentials $(CLUSTER_NAME) --zone $(ZONE)
-
-#
-# Note that get-credentials fetches the access credentials for the managed Kubernetes cluster and inserts it
-# into your kubeconfig (~/.kube/config)
-#
-
+	$(GC) container clusters get-credentials $(CLUSTER_NAME) --zone $(ZONE) | tee -a $(LOG_DIR)/gcp-cluster.log
+	# Use back-ticks for subshell because $(...) notation is used by make
+	$(KC) config rename-context `$(KC) config current-context` $(GCP_CTX) | tee -a $(LOG_DIR)/GCP-cluster.log
 
 stop:
-	$(GC)  container clusters delete $(CLUSTER_NAME) --zone $(ZONE) --async --quiet | tee $(LOG_DIR)/gcp-stop.log
+	$(GC) container clusters delete $(CLUSTER_NAME) --zone $(ZONE) --async --quiet | tee $(LOG_DIR)/gcp-stop.log
+
+up:
+	@echo "NOT YET IMPLEMENTED"
+	exit 1
+
+down:
+	@echo "NOT YET IMPLEMENTED"
+	exit 1	
+
+# Show all GCP clusters
+# This currently duplicates target "status"
+ls: showcontext
+	$(GC) container clusters --zone $(ZONE) list
 
 status: showcontext
 	$(GC) container clusters --zone $(ZONE) list | tee $(LOG_DIR)/gcp-status.log
 
-# dashboard: Haven't bothered to find Google dashboard
+# Only two $(KC) command in a vendor-specific Makefile
+# Set context to latest GCP cluster
+cd:
+	$(KC) config use-context $(GCP_CTX)
 
-extern: showcontext
-	$(KC) -n istio-system get service istio-ingressgateway
-
-# cd: GCP context names are long and vary with zone, project, and other things
-
-# show svc across all namespaces
-lsa: showcontext
-	$(KC) get svc --all-namespaces
-
-# show deploy and pods in current ns; svc of cmpt756 ns
-ls: showcontext
-	$(KC) get gw,deployments,pods
-	$(KC) -n $(NS) get svc
-
-# show containers across all pods
-lsd:
-	$(KC) get pods --all-namespaces -o=jsonpath='{range .items[*]}{"\n"}{.metadata.name}{":\t"}{range .spec.containers[*]}{.image}{", "}{end}{end}' | sort
-
-# reinstate:  Not necessary (all the updates are retained until cluster is deleted)
-
+# Vendor-agnostic but subtarget of vendor-specific targets such as "start"
 showcontext:
 	$(KC) config get-contexts
