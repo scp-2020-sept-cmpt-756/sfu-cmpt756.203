@@ -69,9 +69,12 @@ down:
 	@echo "NOT YET IMPLEMENTED"
 	exit 1	
 
-# Show all GCP clusters
+# Show current context and all GCP clusters
 # This currently duplicates target "status"
-ls: showcontext
+ls: showcontext lsnc
+
+# Show all GCP clusters
+lsnc:
 	$(GC) container clusters --zone $(ZONE) list
 
 status: showcontext

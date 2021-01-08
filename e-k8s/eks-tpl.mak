@@ -46,11 +46,17 @@ up:
 down:
 	$(EKS) delete nodegroup --cluster=$(CLUSTER_NAME) --region $(REGION) --name=$(NGROUP) | tee $(LOG_DIR)/repl-nodes.log
 
-# Show all AWS clusters
+# Show current context and all AWS clusters and nodegroups
 # This currently duplicates target "status"
-ls: showcontext
-	$(EKS) get cluster --region $(REGION) | tee $(LOG_DIR)/eks-status.log
-	$(EKS) get nodegroup --cluster $(CLUSTER_NAME) --region $(REGION) | tee -a $(LOG_DIR)/eks-status.log
+ls: showcontext lsnc
+
+# Show all AWS clusters and nodegroups
+lsnc: lscl
+	$(EKS) get nodegroup --cluster $(CLUSTER_NAME) --region $(REGION)
+
+# Show all AWS clusters
+lscl:
+	$(EKS) get cluster --region $(REGION)
 
 status: showcontext
 	$(EKS) get cluster --region $(REGION) | tee $(LOG_DIR)/eks-status.log

@@ -66,9 +66,12 @@ down:
 	@echo "NOT YET IMPLEMENTED"
 	exit 1	
 
-# Show all Azure clusters
+# Show current context and all Azure clusters
 # This currently duplicates target "status"
-ls: showcontext
+ls: showcontext lsnc
+
+# Show all Azure clusters
+lsnc:
 	$(AKS) list -o table
 
 status: showcontext
