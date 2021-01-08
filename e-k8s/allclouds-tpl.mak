@@ -18,3 +18,5 @@ ls:
 	@echo "GCP (gcp.mak):"
 	@make -f gcp.mak lsnc
 	@echo
+	@echo "DynamoDB tables, read units, and write units"
+	@make -f k8s.mak ls-tables

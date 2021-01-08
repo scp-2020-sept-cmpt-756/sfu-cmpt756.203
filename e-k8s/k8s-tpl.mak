@@ -17,6 +17,7 @@
 # These will be filled in by template processor
 CREG=ZZ-CR-ID
 REGID=ZZ-REG-ID
+AWS_REGION=ZZ-AWS-REGION
 JAVA_HOME=ZZ-JAVA-HOME
 GAT_DIR=ZZ-GAT-DIR
 
@@ -133,6 +134,10 @@ showcontext:
 #
 dynamodb: cluster/cloudformationdynamodb.json
 	$(AWS) cloudformation create-stack --stack-name db --template-body file://$<
+
+# --- ls-tables: List the tables and their read/write units for all DynamodDB tables
+ls-tables:
+	@tools/list-dynamodb-tables.sh $(AWS) $(AWS_REGION)
 
 # --- registry-login: Login to the container registry
 #
