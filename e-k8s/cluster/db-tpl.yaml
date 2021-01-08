@@ -1,5 +1,5 @@
 #
-# SFU CMPT 756.203
+# SFU CMPT 756
 #
 # k8s yaml to deploy:
 #   1 Deployment - this governs the logic (container)
@@ -12,9 +12,6 @@
 #    .spec.template.spec.containers[0].ports
 # 2. Deployment's .spec.template.spec.containers.livenessProbe & readinessProbe
 #    can be removed to clean up the logs
-# 3. You must supply your AWS specifics in the secret resource
-#
-# TODO: You must run the template processor to fill in the template variables "ZZ-*"
 #
 apiVersion: v1
 kind: Service
@@ -59,7 +56,7 @@ spec:
       serviceAccountName: svc-db
       containers:
       - name: cmpt756db
-        image: ZZ-CR-ID/ZZ-REG-ID/cmpt756db:latest
+        image: ZZ-CR-ID/ZZ-REG-ID/cmpt756db:v1
         imagePullPolicy: Always
         envFrom:
         - secretRef:

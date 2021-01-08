@@ -43,6 +43,7 @@ USERS=1
 # these might need to change
 APP_NS=c756ns
 ISTIO_NS=istio-system
+APP_VER_TAG=v1
 
 # ----------------------------------------------------------------------------------------
 # -------  Targets to be invoked directly from command line                        -------
@@ -70,6 +71,12 @@ provision: istio prom kiali deploy
 # may be necessary in limited cases
 deploy: appns gw s1 s2 db monitoring
 	$(KC) -n $(APP_NS) get gw,vs,deploy,svc,pods
+
+# --- rollout: Rollout a new version of the three microservices
+rollout: s1 s2 db
+	$(KC) rollout -n $(APP_NS) restart deployment/cmpt756s1
+	$(KC) rollout -n $(APP_NS) restart deployment/cmpt756s2
+	$(KC) rollout -n $(APP_NS) restart deployment/cmpt756db
 
 # --- health-off: Turn off the health monitoring for the three microservices
 # If you don't know exactly why you want to do this---don't
@@ -247,26 +254,26 @@ db: cluster/db.yaml $(LOG_DIR)/db.repo.log cluster/db-sm.yaml cluster/awscred.ya
 
 # Build the s1 service
 $(LOG_DIR)/s1.repo.log: s1/Dockerfile s1/app.py s1/requirements.txt
-	$(DK) build -t $(CREG)/$(REGID)/cmpt756s1:latest s1 | tee $(LOG_DIR)/s1.img.log
-	$(DK) push $(CREG)/$(REGID)/cmpt756s1:latest | tee $(LOG_DIR)/s1.repo.log
+	$(DK) build -t $(CREG)/$(REGID)/cmpt756s1:$(APP_VER_TAG) s1 | tee $(LOG_DIR)/s1.img.log
+	$(DK) push $(CREG)/$(REGID)/cmpt756s1:$(APP_VER_TAG) | tee $(LOG_DIR)/s1.repo.log
 
 # Build the s2 service
 $(LOG_DIR)/s2.repo.log: s2/Dockerfile s2/app.py s2/requirements.txt
-	$(DK) build -t $(CREG)/$(REGID)/cmpt756s2:latest s2 | tee $(LOG_DIR)/s2.img.log
-	$(DK) push $(CREG)/$(REGID)/cmpt756s2:latest | tee $(LOG_DIR)/s2.repo.log
+	$(DK) build -t $(CREG)/$(REGID)/cmpt756s2:$(APP_VER_TAG) s2 | tee $(LOG_DIR)/s2.img.log
+	$(DK) push $(CREG)/$(REGID)/cmpt756s2:$(APP_VER_TAG) | tee $(LOG_DIR)/s2.repo.log
 
 # Build the db service
 $(LOG_DIR)/db.repo.log: db/Dockerfile db/app.py db/requirements.txt
-	$(DK) build -t $(CREG)/$(REGID)/cmpt756db:latest db | tee $(LOG_DIR)/db.img.log
-	$(DK) push $(CREG)/$(REGID)/cmpt756db:latest | tee $(LOG_DIR)/db.repo.log
+	$(DK) build -t $(CREG)/$(REGID)/cmpt756db:$(APP_VER_TAG) db | tee $(LOG_DIR)/db.img.log
+	$(DK) push $(CREG)/$(REGID)/cmpt756db:$(APP_VER_TAG) | tee $(LOG_DIR)/db.repo.log
 
 # Push all the container images to the container registry
 # This isn't often used because the individual build targets also push
 # the updated images to the registry
 cr:
-	$(DK) push $(CREG)/$(REGID)/cmpt756s1:latest | tee $(LOG_DIR)/s1.repo.log
-	$(DK) push $(CREG)/$(REGID)/cmpt756s2:latest | tee $(LOG_DIR)/s2.repo.log
-	$(DK) push $(CREG)/$(REGID)/cmpt756db:latest | tee $(LOG_DIR)/db.repo.log
+	$(DK) push $(CREG)/$(REGID)/cmpt756s1:$(APP_VER_TAG) | tee $(LOG_DIR)/s1.repo.log
+	$(DK) push $(CREG)/$(REGID)/cmpt756s2:$(APP_VER_TAG) | tee $(LOG_DIR)/s2.repo.log
+	$(DK) push $(CREG)/$(REGID)/cmpt756db:$(APP_VER_TAG) | tee $(LOG_DIR)/db.repo.log
 
 #
 # Other attempts at Gatling commands. Target `gatling-command` is preferred.
