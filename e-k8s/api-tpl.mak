@@ -1,7 +1,6 @@
 #
-# Janky front-end to bring some sanity (?) to the litany of tools and switches
-# in setting up, tearing down and validating your Minikube cluster for working
-# with k8s and istio.
+# Front-end to bring some sanity to the litany of tools and switches
+# in calling the sample application from the command line.
 #
 # This file covers off driving the API independent of where the cluster is
 # running.

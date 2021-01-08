@@ -1,5 +1,6 @@
-# Janky front-end to bring some sanity (?) to the litany of tools and switches
-# for working with a k8s cluster. This file adds a set of monitoring and
+#
+# Sub-make file to bring some sanity to the litany of tools and switches
+# for installing Prometheus and Istio. This file adds a set of monitoring and
 # observability tool including: Prometheus, Grafana and Kiali by way of installing
 # them using Helm. Note the Helm repo is up-to-date as of mid-Nov 2020. 
 #
