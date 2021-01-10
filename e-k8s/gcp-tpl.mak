@@ -33,6 +33,9 @@ IMAGE_TYPE="COS"
 DISK_TYPE="pd-standard"
 DISK_SIZE="32"
 NUM_NODES=3 # This was default for Google's "My First Cluster"
+# The CMPT 756 stack will run with 2 `g1-small` nodes but has almost
+# no memory to spare
+#NUM_NODES=2
 
 # This version is supported for us-west2
 KVER=1.19.3
