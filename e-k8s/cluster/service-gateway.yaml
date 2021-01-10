@@ -1,5 +1,5 @@
 #
-# SFU CMPT 756.203
+# SFU CMPT 756
 #
 # k8s yaml to provide ingress to the application microservices:
 #   1 Gateway - this is the point of control for what goes in or out of the

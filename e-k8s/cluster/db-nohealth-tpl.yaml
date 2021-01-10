@@ -1,5 +1,5 @@
 #
-# SFU CMPT 756.203
+# SFU CMPT 756
 #
 # k8s yaml to deploy:
 #   1 Deployment - this governs the logic (container)
