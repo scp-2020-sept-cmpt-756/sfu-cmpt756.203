@@ -27,7 +27,7 @@ EKS_CTX=aws756
 
 
 NGROUP=worker-nodes
-NTYPE=t2.medium
+NTYPE=t3.medium
 REGION=ZZ-AWS-REGION
 KVER=1.18
 
