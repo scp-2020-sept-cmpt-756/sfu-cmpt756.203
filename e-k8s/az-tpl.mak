@@ -50,13 +50,14 @@ start: showcontext
 	date | tee  $(LOG_DIR)/az-cluster.log
 	$(AZ) group create -o table --name $(GRP) --location $(REGION) | tee -a $(LOG_DIR)/az-cluster.log
 	$(AKS) create -o table --resource-group $(GRP) --name $(CLUSTER_NAME) --kubernetes-version $(KVER) --node-count 2 --node-vm-size $(NTYPE) --generate-ssh-keys | tee -a $(LOG_DIR)/az-cluster.log
-	$(AKS) get-credentials --resource-group $(GRP) --name $(CLUSTER_NAME) --overwrite-existing | tee -a $(LOG_DIR)/az-cluster.log
+	$(AKS) get-credentials --resource-group $(GRP) --name $(CLUSTER_NAME) --context $(AZ_CTX) --overwrite-existing | tee -a $(LOG_DIR)/az-cluster.log
 	$(AKS) list -o table | tee -a $(LOG_DIR)/az-cluster.log
 	date | tee -a $(LOG_DIR)/az-cluster.log
 
 
 stop:
-	$(AKS) delete --name $(CLUSTER_NAME) --resource-group $(GRP) -y --no-wait | tee $(LOG_DIR)/aks-stop.log
+	$(AKS) delete --name $(CLUSTER_NAME) --resource-group $(GRP) -y | tee $(LOG_DIR)/aks-stop.log
+	$(KC) config delete-context $(AZ_CTX) | tee -a $(LOG_DIR)/aks-stop.log
 
 up:
 	@echo "NOT YET IMPLEMENTED"

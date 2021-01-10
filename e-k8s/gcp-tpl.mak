@@ -59,7 +59,8 @@ start:	showcontext
 	$(KC) config rename-context `$(KC) config current-context` $(GCP_CTX) | tee -a $(LOG_DIR)/GCP-cluster.log
 
 stop:
-	$(GC) container clusters delete $(CLUSTER_NAME) --zone $(ZONE) --async --quiet | tee $(LOG_DIR)/gcp-stop.log
+	$(GC) container clusters delete $(CLUSTER_NAME) --zone $(ZONE) --quiet | tee $(LOG_DIR)/gcp-stop.log
+	$(KC) config delete-context $(GCP_CTX) | tee -a $(LOG_DIR)/gcp-stop.log
 
 up:
 	@echo "NOT YET IMPLEMENTED"
