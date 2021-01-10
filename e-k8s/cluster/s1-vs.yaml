@@ -1,0 +1,23 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: cmpt756s1
+spec:
+  hosts:
+  # We do not know the hostname of traffic from this gateway, so
+  # apply this VS to every request entering it.
+  - "*"
+  # As an externally-visible service, this only applies to the gateway
+  gateways:
+  - c756-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /api/v1/user
+    rewrite:
+      uri: /api/v1/user
+    route:
+    - destination:
+        host: cmpt756s1
+        port:
+          number: 30000

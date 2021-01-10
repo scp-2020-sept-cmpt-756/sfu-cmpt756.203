@@ -1,0 +1,47 @@
+#
+# SFU CMPT 756
+#
+# Istio yaml to deploy a VirtualService
+#
+# DestinationRule lists the subset destination Kubernetes Services
+# that will receive traffic from the Istio VirtualService.
+# VirtualService routes URLs to the destinations, splitting the traffic
+# across destinations according to weights.
+#
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: cmpt756s2
+spec:
+  host: cmpt756s2
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: cmpt756s2
+spec:
+  hosts:
+  # We do not know the hostname of traffic from this gateway, so
+  # apply this VS to every request entering it.
+  - "*"
+  # As an externally-visible service, this only applies to the gateway
+  gateways:
+  - c756-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /api/v1/music
+    rewrite:
+      uri: /api/v1/music
+    route:
+    - weight: 100
+      destination:
+        host: cmpt756s2
+        port:
+          number: 30001
+        subset: v1
+      

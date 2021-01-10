@@ -24,26 +24,37 @@ GAT_DIR=ZZ-GAT-DIR
 # Keep all the logs out of main directory
 LOG_DIR=logs
 
+# These should be in your search path
 KC=kubectl
 DK=docker
 AWS=aws
 IC=istioctl
 
-# Gatling parameters---you should not have to change these
-GAT=$(GAT_DIR)/bin/gatling.sh
-SIM_DIR=gatling/simulations
-SIM_PACKAGE=proj756
-SIM_PACKAGE_DIR=$(SIM_DIR)/$(SIM_PACKAGE)
-SIM_FILE=ReadTables.scala
+# Application versions
+# Override these by environment variables and `make -e`
+APP_VER_TAG=v1
+S2_VER=v1
+
+# Gatling parameters to be overridden by environment variables and `make -e`
 SIM_NAME=ReadUserSim
-SIM_FULL_NAME=$(SIM_PACKAGE).$(SIM_NAME)
-GATLING_OPTIONS=
 USERS=1
 
-# these might need to change
+# Gatling parameters that most of the time will be unchanged
+# but which you might override as projects become sophisticated
+SIM_FILE=ReadTables.scala
+SIM_PACKAGE=proj756
+GATLING_OPTIONS=
+
+# Other Gatling parameters---you should not have to change these
+GAT=$(GAT_DIR)/bin/gatling.sh
+SIM_DIR=gatling/simulations
+SIM_PACKAGE_DIR=$(SIM_DIR)/$(SIM_PACKAGE)
+SIM_FULL_NAME=$(SIM_PACKAGE).$(SIM_NAME)
+
+# Kubernetes parameters that most of the time will be unchanged
+# but which you might override as projects become sophisticated
 APP_NS=c756ns
 ISTIO_NS=istio-system
-APP_VER_TAG=v1
 
 # ----------------------------------------------------------------------------------------
 # -------  Targets to be invoked directly from command line                        -------
@@ -67,15 +78,25 @@ templates:
 provision: istio prom kiali deploy
 
 # --- deploy: Deploy and monitor the three microservices
-# Typically you will use `provision` instead but this more specialized target
-# may be necessary in limited cases
+# Use `provision` to deploy the entire stack (including Istio, Prometheus, ...).
+# This target only deploys the sample microservices
 deploy: appns gw s1 s2 db monitoring
 	$(KC) -n $(APP_NS) get gw,vs,deploy,svc,pods
 
-# --- rollout: Rollout a new version of the three microservices
-rollout: s1 s2 db
+# --- rollout: Rollout new deployments of all microservices
+rollout: rollout-s1 rollout-s2 rollout-db
+
+# --- rollout-s1: Rollout a new deployment of S1
+rollout-s1: s1
 	$(KC) rollout -n $(APP_NS) restart deployment/cmpt756s1
-	$(KC) rollout -n $(APP_NS) restart deployment/cmpt756s2
+
+# --- rollout-s2: Rollout a new deployment of S2
+rollout-s2: $(LOG_DIR)/s2-$(S2_VER).repo.log  cluster/s2-dpl-$(S2_VER).yaml
+	$(KC) -n $(APP_NS) apply -f cluster/s2-dpl-$(S2_VER).yaml | tee $(LOG_DIR)/rollout-s2.log
+	$(KC) rollout -n $(APP_NS) restart deployment/cmpt756s2-$(S2_VER) | tee -a $(LOG_DIR)/rollout-s2.log
+
+# --- rollout-db: Rollout a new deployment of DB
+rollout-db: db
 	$(KC) rollout -n $(APP_NS) restart deployment/cmpt756db
 
 # --- health-off: Turn off the health monitoring for the three microservices
@@ -85,14 +106,16 @@ health-off:
 	$(KC) -n $(APP_NS) apply -f cluster/s2-nohealth.yaml
 	$(KC) -n $(APP_NS) apply -f cluster/db-nohealth.yaml
 
-# --- scratch: Delete the microservices
+# --- scratch: Delete the microservices and everything else in application NS
 scratch: clean
-	$(KC) delete -n $(APP_NS) deploy cmpt756s1 cmpt756s2 cmpt756db --ignore-not-found=true
-	$(KC) delete -n $(APP_NS) svc cmpt756s1 cmpt756s2 cmpt756db --ignore-not-found=true
-	$(KC) delete -n $(APP_NS) gw c756-gateway --ignore-not-found=true
-	$(KC) delete -n $(APP_NS) vs c756vs --ignore-not-found=true
+	$(KC) delete -n $(APP_NS) deploy --all
+	$(KC) delete -n $(APP_NS) svc    --all
+	$(KC) delete -n $(APP_NS) gw     --all
+	$(KC) delete -n $(APP_NS) dr     --all
+	$(KC) delete -n $(APP_NS) vs     --all
+	$(KC) delete -n $(APP_NS) se     --all
 	$(KC) delete -n $(ISTIO_NS) vs monitoring --ignore-not-found=true
-	$(KC) get -n $(APP_NS) deploy,svc,pods,gw,vs
+	$(KC) get -n $(APP_NS) deploy,svc,pods,gw,dr,vs,se
 	$(KC) get -n $(ISTIO_NS) vs
 
 # --- clean: Delete all the log files
@@ -126,8 +149,8 @@ lsd:
 	$(KC) get pods --all-namespaces -o=jsonpath='{range .items[*]}{"\n"}{.metadata.name}{":\t"}{range .spec.containers[*]}{.image}{", "}{end}{end}' | sort
 
 # --- reinstate: Reinstate provisioning on a new set of worker nodes
-# Do this after you do `up` on a cluster that implements that operation
-# AWS implements `up` and `down`; other cloud vendors may not
+# Do this after you do `up` on a cluster that implements that operation.
+# AWS implements `up` and `down`; other cloud vendors may not.
 reinstate:
 	$(KC) create ns $(APP_NS) | tee $(LOG_DIR)/reinstate.log
 	$(KC) label ns $(APP_NS) istio-injection=enabled | tee -a $(LOG_DIR)/reinstate.log
@@ -235,22 +258,24 @@ gw: cluster/service-gateway.yaml
 	$(KC) -n $(APP_NS) apply -f $< > $(LOG_DIR)/gw.log
 
 # Update S1 and associated monitoring, rebuilding if necessary
-s1: cluster/s1.yaml $(LOG_DIR)/s1.repo.log cluster/s1-sm.yaml
-	$(KC) -n $(APP_NS) apply -f $< > $(LOG_DIR)/s1.log
+s1: $(LOG_DIR)/s1.repo.log cluster/s1.yaml cluster/s1-sm.yaml cluster/s1-vs.yaml
+	$(KC) -n $(APP_NS) apply -f cluster/s1.yaml > $(LOG_DIR)/s1.log
 	$(KC) -n $(APP_NS) apply -f cluster/s1-sm.yaml >> $(LOG_DIR)/s1.log
+	$(KC) -n $(APP_NS) apply -f cluster/s1-vs.yaml >> $(LOG_DIR)/s1.log
 
 # Update S2 and associated monitoring, rebuilding if necessary
-s2: cluster/s2.yaml $(LOG_DIR)/s2.repo.log cluster/s2-sm.yaml
-	$(KC) -n $(APP_NS) apply -f $< > $(LOG_DIR)/s2.log
-	$(KC) -n $(APP_NS) apply -f cluster/s2-sm.yaml >> $(LOG_DIR)/s2.log
+s2: rollout-s2 cluster/s2-svc.yaml cluster/s2-sm.yaml cluster/s2-vs-$(S2_VER).yaml
+	$(KC) -n $(APP_NS) apply -f cluster/s2-svc.yaml | tee $(LOG_DIR)/s2.log
+	$(KC) -n $(APP_NS) apply -f cluster/s2-sm.yaml | tee -a $(LOG_DIR)/s2.log
+	$(KC) -n $(APP_NS) apply -f cluster/s2-vs-$(S2_VER).yaml | tee -a $(LOG_DIR)/s2.log
 
 # Update DB and associated monitoring, rebuilding if necessary
-db: cluster/db.yaml $(LOG_DIR)/db.repo.log cluster/db-sm.yaml cluster/awscred.yaml
+db: $(LOG_DIR)/db.repo.log cluster/awscred.yaml cluster/dynamodb-service-entry.yaml cluster/db.yaml cluster/db-sm.yaml cluster/db-vs.yaml
 	$(KC) -n $(APP_NS) apply -f cluster/awscred.yaml > $(LOG_DIR)/db.log
-	$(KC) -n $(APP_NS) apply -f $< >> $(LOG_DIR)/db.log
-	$(KC) -n $(APP_NS) apply -f cluster/database-vs.yaml >> $(LOG_DIR)/db.log
-	$(KC) -n $(APP_NS) apply -f cluster/db-sm.yaml >> $(LOG_DIR)/db.log
 	$(KC) -n $(APP_NS) apply -f cluster/dynamodb-service-entry.yaml >> $(LOG_DIR)/db.log
+	$(KC) -n $(APP_NS) apply -f cluster/db.yaml >> $(LOG_DIR)/db.log
+	$(KC) -n $(APP_NS) apply -f cluster/db-sm.yaml >> $(LOG_DIR)/db.log
+	$(KC) -n $(APP_NS) apply -f cluster/db-vs.yaml >> $(LOG_DIR)/db.log
 
 # Build the s1 service
 $(LOG_DIR)/s1.repo.log: s1/Dockerfile s1/app.py s1/requirements.txt
@@ -258,9 +283,9 @@ $(LOG_DIR)/s1.repo.log: s1/Dockerfile s1/app.py s1/requirements.txt
 	$(DK) push $(CREG)/$(REGID)/cmpt756s1:$(APP_VER_TAG) | tee $(LOG_DIR)/s1.repo.log
 
 # Build the s2 service
-$(LOG_DIR)/s2.repo.log: s2/Dockerfile s2/app.py s2/requirements.txt
-	$(DK) build -t $(CREG)/$(REGID)/cmpt756s2:$(APP_VER_TAG) s2 | tee $(LOG_DIR)/s2.img.log
-	$(DK) push $(CREG)/$(REGID)/cmpt756s2:$(APP_VER_TAG) | tee $(LOG_DIR)/s2.repo.log
+$(LOG_DIR)/s2-$(S2_VER).repo.log: s2/$(S2_VER)/Dockerfile s2/$(S2_VER)/app.py s2/$(S2_VER)/requirements.txt
+	$(DK) build -t $(CREG)/$(REGID)/cmpt756s2:$(S2_VER) s2/$(S2_VER) | tee $(LOG_DIR)/s2-$(S2_VER).img.log
+	$(DK) push $(CREG)/$(REGID)/cmpt756s2:$(S2_VER) | tee $(LOG_DIR)/s2-$(S2_VER).repo.log
 
 # Build the db service
 $(LOG_DIR)/db.repo.log: db/Dockerfile db/app.py db/requirements.txt
@@ -272,7 +297,7 @@ $(LOG_DIR)/db.repo.log: db/Dockerfile db/app.py db/requirements.txt
 # the updated images to the registry
 cr:
 	$(DK) push $(CREG)/$(REGID)/cmpt756s1:$(APP_VER_TAG) | tee $(LOG_DIR)/s1.repo.log
-	$(DK) push $(CREG)/$(REGID)/cmpt756s2:$(APP_VER_TAG) | tee $(LOG_DIR)/s2.repo.log
+	$(DK) push $(CREG)/$(REGID)/cmpt756s2:$(S2_VER) | tee $(LOG_DIR)/s2.repo.log
 	$(DK) push $(CREG)/$(REGID)/cmpt756db:$(APP_VER_TAG) | tee $(LOG_DIR)/db.repo.log
 
 #
@@ -286,12 +311,10 @@ gatling: $(SIM_PACKAGE_DIR)/$(SIM_FILE)
 # The following should probably not be used---it starts the job but under most shells
 # this process will not be listed by the `jobs` command. This makes it difficult
 # to kill the process when you want to end the load test
-# Shortcut: Read from Music table on current cluster. Only specify USERS.
 gatling-music:
 	@/bin/sh -c 'CLUSTER_IP=$(INGRESS_IP) USERS=$(USERS) SIM_NAME=ReadMusicSim JAVA_HOME=$(JAVA_HOME) $(GAT) -rsf gatling/resources -sf $(SIM_DIR) -bf $(GAT_DIR)/target/test-classes -s $(SIM_FULL_NAME) -rd "Simulation $(SIM_NAME)" $(GATLING_OPTIONS) $(GAT_SUFFIX)'
 
 # Different approach from gatling-music but the same problems. Probably do not use this.
-# Shortcut: Read from User table on current cluster. Only specify USERS.
 gatling-user:
 	@/bin/sh -c 'CLUSTER_IP=$(INGRESS_IP) USERS=$(USERS) SIM_NAME=ReadUserSim make -e -f k8s.mak gatling $(GAT_SUFFIX)'
 

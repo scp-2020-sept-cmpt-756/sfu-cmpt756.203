@@ -1,7 +1,7 @@
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
-  name: c756db
+  name: cmpt756db
 spec:
   hosts:
   - cmpt756db

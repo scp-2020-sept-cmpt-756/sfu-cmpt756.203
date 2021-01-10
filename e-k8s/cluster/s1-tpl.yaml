@@ -55,7 +55,7 @@ spec:
     spec:
       serviceAccountName: svc-s1
       containers:
-      - name: service1
+      - name: cmpt756s1
         image: ZZ-CR-ID/ZZ-REG-ID/cmpt756s1:v1
         imagePullPolicy: Always
         ports:

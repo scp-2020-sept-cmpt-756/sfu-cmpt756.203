@@ -1,0 +1,37 @@
+#
+# SFU CMPT 756
+#
+# k8s yaml to define a Kubernetes service:
+#   1 Service - this opens up the logic
+#   1 Service Account - this enable access control
+#
+# This service will need one or more corresponding Deployments to
+# provide Endpoints implementing it.
+#
+# Because we are using Istio, an Istio VirtualService will reside
+# between this Service and the Deployments providing its EndPoints.
+#
+# Notes:
+#
+# 1. the Service's .spec.ports[0] needs to match the Deployment's
+#    .spec.template.spec.containers[0].ports
+#
+apiVersion: v1
+kind: Service
+metadata:
+  name: cmpt756s2
+  labels:
+    app: cmpt756s2
+spec:
+  ports:
+  - port: 30001
+    name: http
+  selector:
+    app: cmpt756s2
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: svc-s2
+  labels:
+    account: SVC_S2

@@ -1,10 +1,13 @@
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
-  name: c756db
+  name: cmpt756db
 spec:
   hosts:
   - cmpt756db
+  # This is an internal service, so is not announced to the gateway.
+  # With no "gateways" field, the default applies: Make this service
+  # known internally to every other service.
   http:
   - match:
     - uri:
@@ -16,8 +19,3 @@ spec:
         host: cmpt756db
         port:
           number: 30002
-    fault:
-      abort:
-        httpStatus: 500
-        percentage:
-          value: 10

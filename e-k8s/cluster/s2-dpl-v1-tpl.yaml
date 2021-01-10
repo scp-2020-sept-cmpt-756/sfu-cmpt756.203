@@ -1,0 +1,57 @@
+#
+# SFU CMPT 756
+#
+# Kubernetes yaml to deploy pods as Endpoints of a Service.
+# The matchLabels connect this Deployment to a Service.
+# There can be several Deployments implementing Endpoints of the same Service.
+# Each Deployment will typically be a different version.
+#
+# The Istio VirtualService and DestinationRules will route traffic to the
+# different Deployments.
+#
+# Deployment's .spec.template.spec.containers.livenessProbe & readinessProbe
+#    can be removed to clean up the logs
+#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cmpt756s2-v1
+  labels:
+    app: cmpt756s2
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cmpt756s2
+      version: v1
+  template:
+    metadata:
+      name: service2-pod
+      labels:
+        app: cmpt756s2
+        version: v1
+    spec:
+      serviceAccountName: svc-s2
+      containers:
+      - name: cmpt756s2
+        image: ZZ-CR-ID/ZZ-REG-ID/cmpt756s2:v1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 30001
+        livenessProbe:
+          httpGet:
+            path: /api/v1/music/health
+            port: 30001
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: /api/v1/music/readiness
+            port: 30001
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 2
+          successThreshold: 1
+          failureThreshold: 5

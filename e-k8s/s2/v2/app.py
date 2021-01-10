@@ -24,7 +24,7 @@ import simplejson as json
 
 # Integer value 0 <= v < 100, denoting proportion of
 # calls to `get_song` to return 500 from
-PERCENT_ERROR = 10
+PERCENT_ERROR = 50
 
 app = Flask(__name__)
 

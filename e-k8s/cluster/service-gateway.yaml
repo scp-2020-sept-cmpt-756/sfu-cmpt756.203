@@ -1,9 +1,9 @@
 #
 # SFU CMPT 756
 #
-# k8s yaml to provide ingress to the application microservices:
+# k8s yaml to provide ingress to the service mesh:
 #   1 Gateway - this is the point of control for what goes in or out of the
-#     cluster
+#     mesh
 #   1 VirtualService - this opens up the routes to the microservices
 #
 # Notes:
@@ -11,9 +11,6 @@
 # 1. Gateway's .spec.servers.port.number is where istio will serve the API.
 #    This means that you can move the service around publically irrespective of
 #    the actual implementation.
-# 2. VirtualService's .spec.http.match.uri & .rewrite.uri allows you to publish/implement
-#    a public API path while routing to a private/legacy path.
-#
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
@@ -28,34 +25,3 @@ spec:
       protocol: HTTP
     hosts:
     - "*"
----
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: c756vs
-spec:
-  hosts:
-  - "*"
-  gateways:
-  - c756-gateway
-  http:
-  - match:
-    - uri:
-        prefix: /api/v1/user
-    rewrite:
-      uri: /api/v1/user
-    route:
-    - destination:
-        host: cmpt756s1
-        port:
-          number: 30000
-  - match:
-    - uri:
-        prefix: /api/v1/music
-    rewrite:
-      uri: /api/v1/music
-    route:
-    - destination:
-        host: cmpt756s2
-        port:
-          number: 30001
