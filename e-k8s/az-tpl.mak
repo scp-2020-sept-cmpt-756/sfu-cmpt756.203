@@ -47,17 +47,17 @@ KVER=1.19.3
 # But they're not available in the canadacentral region as of Oct 2020
 #
 start: showcontext
-	date | tee  $(LOG_DIR)/az-cluster.log
-	$(AZ) group create -o table --name $(GRP) --location $(REGION) | tee -a $(LOG_DIR)/az-cluster.log
-	$(AKS) create -o table --resource-group $(GRP) --name $(CLUSTER_NAME) --kubernetes-version $(KVER) --node-count 2 --node-vm-size $(NTYPE) --generate-ssh-keys | tee -a $(LOG_DIR)/az-cluster.log
-	$(AKS) get-credentials --resource-group $(GRP) --name $(CLUSTER_NAME) --context $(AZ_CTX) --overwrite-existing | tee -a $(LOG_DIR)/az-cluster.log
-	$(AKS) list -o table | tee -a $(LOG_DIR)/az-cluster.log
-	date | tee -a $(LOG_DIR)/az-cluster.log
+	date | tee  $(LOG_DIR)/az-start.log
+	$(AZ) group create -o table --name $(GRP) --location $(REGION) | tee -a $(LOG_DIR)/az-start.log
+	$(AKS) create -o table --resource-group $(GRP) --name $(CLUSTER_NAME) --kubernetes-version $(KVER) --node-count 2 --node-vm-size $(NTYPE) --generate-ssh-keys | tee -a $(LOG_DIR)/az-start.log
+	$(AKS) get-credentials --resource-group $(GRP) --name $(CLUSTER_NAME) --context $(AZ_CTX) --overwrite-existing | tee -a $(LOG_DIR)/az-start.log
+	$(AKS) list -o table | tee -a $(LOG_DIR)/az-start.log
+	date | tee -a $(LOG_DIR)/az-start.log
 
 
 stop:
-	$(AKS) delete --name $(CLUSTER_NAME) --resource-group $(GRP) -y | tee $(LOG_DIR)/aks-stop.log
-	$(KC) config delete-context $(AZ_CTX) | tee -a $(LOG_DIR)/aks-stop.log
+	$(AKS) delete --name $(CLUSTER_NAME) --resource-group $(GRP) -y | tee $(LOG_DIR)/az-stop.log
+	$(KC) config delete-context $(AZ_CTX) | tee -a $(LOG_DIR)/az-stop.log
 
 up:
 	@echo "NOT YET IMPLEMENTED"
@@ -76,7 +76,7 @@ lsnc:
 	$(AKS) list -o table
 
 status: showcontext
-	$(AKS) list -o table | tee $(LOG_DIR)/aks-status.log
+	$(AKS) list -o table | tee $(LOG_DIR)/az-status.log
 
 # Only two $(KC) command in a vendor-specific Makefile
 # Set context to latest Azure cluster

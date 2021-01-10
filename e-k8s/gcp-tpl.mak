@@ -38,7 +38,7 @@ NUM_NODES=3 # This was default for Google's "My First Cluster"
 KVER=1.19.3
 
 start:	showcontext
-	date | tee  $(LOG_DIR)/gcp-cluster.log
+	date | tee  $(LOG_DIR)/gcp-start.log
 	# This long list of options is the recommendation produced by Google's "My First Cluster"
 	# The lines up to and including "metadata" are required for 756.
 	# The lines after that may or may not be necessary
@@ -51,12 +51,12 @@ start:	showcontext
 	      --no-enable-stackdriver-kubernetes \
 	      --addons HorizontalPodAutoscaling,HttpLoadBalancing \
 	      --enable-ip-alias --no-enable-master-authorized-networks --enable-shielded-nodes \
-	      --default-max-pods-per-node "110" --enable-autoupgrade --enable-autorepair --max-surge-upgrade 1 --max-unavailable-upgrade 0 | tee -a $(LOG_DIR)/gcp-cluster.log
+	      --default-max-pods-per-node "110" --enable-autoupgrade --enable-autorepair --max-surge-upgrade 1 --max-unavailable-upgrade 0 | tee -a $(LOG_DIR)/gcp-start.log
 	      # These options were in original Google version but do not seem necessary for this project
 	      #--network "projects/c756proj/global/networks/default" --subnetwork "projects/c756proj/regions/us-west1/subnetworks/default"
-	$(GC) container clusters get-credentials $(CLUSTER_NAME) --zone $(ZONE) | tee -a $(LOG_DIR)/gcp-cluster.log
+	$(GC) container clusters get-credentials $(CLUSTER_NAME) --zone $(ZONE) | tee -a $(LOG_DIR)/gcp-start.log
 	# Use back-ticks for subshell because $(...) notation is used by make
-	$(KC) config rename-context `$(KC) config current-context` $(GCP_CTX) | tee -a $(LOG_DIR)/GCP-cluster.log
+	$(KC) config rename-context `$(KC) config current-context` $(GCP_CTX) | tee -a $(LOG_DIR)/gcp-start.log
 
 stop:
 	$(GC) container clusters delete $(CLUSTER_NAME) --zone $(ZONE) --quiet | tee $(LOG_DIR)/gcp-stop.log

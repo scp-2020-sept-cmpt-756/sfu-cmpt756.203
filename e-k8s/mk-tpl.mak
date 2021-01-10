@@ -32,8 +32,8 @@ DRIVER=virtualbox
 KVER=1.19.4
 
 start:
-	$(MK) start -p $(MK_CTX) --kubernetes-version='$(KVER)' driver=$(DRIVER) | tee $(LOG_DIR)/mk-cluster.log
-	$(MK) profile $(MK_CTX) | tee -a $(LOG_DIR)/mk-cluster.log
+	$(MK) start -p $(MK_CTX) --kubernetes-version='$(KVER)' driver=$(DRIVER) | tee $(LOG_DIR)/mk-start.log
+	$(MK) profile $(MK_CTX) | tee -a $(LOG_DIR)/mk-start.log
 
 stop: showcontext
 	$(MK) stop | tee $(LOG_DIR)/mk-stop.log
