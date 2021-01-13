@@ -118,9 +118,9 @@ scratch: clean
 	$(KC) get -n $(APP_NS) deploy,svc,pods,gw,dr,vs,se
 	$(KC) get -n $(ISTIO_NS) vs
 
-# --- clean: Delete all the log files
+# --- clean: Delete all the application log files
 clean:
-	/bin/rm -f $(LOG_DIR)/{s1,s2,db,gw,monvs}.log
+	/bin/rm -f $(LOG_DIR)/{s1,s2,db,gw,monvs}*.log $(LOG_DIR)/rollout*.log
 
 # --- dashboard: Start the standard Kubernetes dashboard
 # NOTE:  Before invoking this, the dashboard must be installed and a service account created
