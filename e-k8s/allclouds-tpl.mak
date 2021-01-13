@@ -20,3 +20,7 @@ ls:
 	@echo
 	@echo "DynamoDB tables, read units, and write units"
 	@make -f k8s.mak ls-tables
+	@echo
+	@echo "Run the following command to list any background Gatling jobs for this process"
+	@echo "jobs | grep gatling"
+	@echo
