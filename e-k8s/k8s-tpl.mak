@@ -259,9 +259,9 @@ gw: cluster/service-gateway.yaml
 
 # Update S1 and associated monitoring, rebuilding if necessary
 s1: $(LOG_DIR)/s1.repo.log cluster/s1.yaml cluster/s1-sm.yaml cluster/s1-vs.yaml
-	$(KC) -n $(APP_NS) apply -f cluster/s1.yaml > $(LOG_DIR)/s1.log
-	$(KC) -n $(APP_NS) apply -f cluster/s1-sm.yaml >> $(LOG_DIR)/s1.log
-	$(KC) -n $(APP_NS) apply -f cluster/s1-vs.yaml >> $(LOG_DIR)/s1.log
+	$(KC) -n $(APP_NS) apply -f cluster/s1.yaml | tee $(LOG_DIR)/s1.log
+	$(KC) -n $(APP_NS) apply -f cluster/s1-sm.yaml | tee -a $(LOG_DIR)/s1.log
+	$(KC) -n $(APP_NS) apply -f cluster/s1-vs.yaml | tee -a $(LOG_DIR)/s1.log
 
 # Update S2 and associated monitoring, rebuilding if necessary
 s2: rollout-s2 cluster/s2-svc.yaml cluster/s2-sm.yaml cluster/s2-vs-$(S2_VER).yaml
@@ -271,11 +271,11 @@ s2: rollout-s2 cluster/s2-svc.yaml cluster/s2-sm.yaml cluster/s2-vs-$(S2_VER).ya
 
 # Update DB and associated monitoring, rebuilding if necessary
 db: $(LOG_DIR)/db.repo.log cluster/awscred.yaml cluster/dynamodb-service-entry.yaml cluster/db.yaml cluster/db-sm.yaml cluster/db-vs.yaml
-	$(KC) -n $(APP_NS) apply -f cluster/awscred.yaml > $(LOG_DIR)/db.log
-	$(KC) -n $(APP_NS) apply -f cluster/dynamodb-service-entry.yaml >> $(LOG_DIR)/db.log
-	$(KC) -n $(APP_NS) apply -f cluster/db.yaml >> $(LOG_DIR)/db.log
-	$(KC) -n $(APP_NS) apply -f cluster/db-sm.yaml >> $(LOG_DIR)/db.log
-	$(KC) -n $(APP_NS) apply -f cluster/db-vs.yaml >> $(LOG_DIR)/db.log
+	$(KC) -n $(APP_NS) apply -f cluster/awscred.yaml | tee $(LOG_DIR)/db.log
+	$(KC) -n $(APP_NS) apply -f cluster/dynamodb-service-entry.yaml | tee -a $(LOG_DIR)/db.log
+	$(KC) -n $(APP_NS) apply -f cluster/db.yaml | tee -a $(LOG_DIR)/db.log
+	$(KC) -n $(APP_NS) apply -f cluster/db-sm.yaml | tee -a $(LOG_DIR)/db.log
+	$(KC) -n $(APP_NS) apply -f cluster/db-vs.yaml | tee -a $(LOG_DIR)/db.log
 
 # Build the s1 service
 $(LOG_DIR)/s1.repo.log: s1/Dockerfile s1/app.py s1/requirements.txt
