@@ -34,6 +34,7 @@ IC=istioctl
 # Override these by environment variables and `make -e`
 APP_VER_TAG=v1
 S2_VER=v1
+LOADER_VER=v1
 
 # Gatling parameters to be overridden by environment variables and `make -e`
 SIM_NAME=ReadUserSim
@@ -48,6 +49,7 @@ GATLING_OPTIONS=
 # Other Gatling parameters---you should not have to change these
 GAT=$(GAT_DIR)/bin/gatling.sh
 SIM_DIR=gatling/simulations
+RES_DIR=gatling/resources
 SIM_PACKAGE_DIR=$(SIM_DIR)/$(SIM_PACKAGE)
 SIM_FULL_NAME=$(SIM_PACKAGE).$(SIM_NAME)
 
@@ -160,6 +162,13 @@ reinstate:
 showcontext:
 	$(KC) config get-contexts
 
+# Run the loader, rebuilding if necessary, starting DynamDB if necessary, building ConfigMaps
+loader: dynamodb-start $(LOG_DIR)/loader.repo.log cluster/loader.yaml
+	$(KC) -n $(APP_NS) delete --ignore-not-found=true jobs/cmpt756loader
+	tools/build-configmap.sh $(RES_DIR)/users.csv cluster/users-header.yaml | kubectl -n $(APP_NS) apply -f -
+	tools/build-configmap.sh $(RES_DIR)/music.csv cluster/music-header.yaml | kubectl -n $(APP_NS) apply -f -
+	$(KC) -n $(APP_NS) apply -f cluster/loader.yaml | tee $(LOG_DIR)/loader.log
+
 # --- dynamodb-start: Start the AWS DynamoDB service
 #
 dynamodb-start: $(LOG_DIR)/dynamodb-start.log
@@ -167,7 +176,9 @@ dynamodb-start: $(LOG_DIR)/dynamodb-start.log
 # --- dynamodb-stop: Stop the AWS DynamoDB service
 #
 dynamodb-stop:
-	$(AWS) cloudformation delete-stack --stack-name db | tee $(LOG_DIR)/dynamodb-stop.log
+	$(AWS) cloudformation delete-stack --stack-name db || true | tee $(LOG_DIR)/dynamodb-stop.log
+	@# Rename DynamoDB log so dynamodb-start will force a restart but retain the log
+	/bin/mv -f $(LOG_DIR)/dynamodb-start.log $(LOG_DIR)/dynamodb-start-old.log
 
 # --- ls-tables: List the tables and their read/write units for all DynamodDB tables
 ls-tables:
@@ -302,6 +313,11 @@ $(LOG_DIR)/db.repo.log: db/Dockerfile db/app.py db/requirements.txt
 	$(DK) build -t $(CREG)/$(REGID)/cmpt756db:$(APP_VER_TAG) db | tee $(LOG_DIR)/db.img.log
 	$(DK) push $(CREG)/$(REGID)/cmpt756db:$(APP_VER_TAG) | tee $(LOG_DIR)/db.repo.log
 
+# Build the loader
+$(LOG_DIR)/loader.repo.log: loader/app.py loader/requirements.txt loader/Dockerfile
+	$(DK) image build -t $(CREG)/$(REGID)/cmpt756loader:$(LOADER_VER) loader  | tee $(LOG_DIR)/loader.img.log
+	$(DK) push $(CREG)/$(REGID)/cmpt756loader:$(LOADER_VER) | tee $(LOG_DIR)/loader.repo.log
+
 # Push all the container images to the container registry
 # This isn't often used because the individual build targets also push
 # the updated images to the registry
@@ -316,13 +332,13 @@ cr:
 #
 # General Gatling target: Specify CLUSTER_IP, USERS, and SIM_NAME as environment variables. Full output.
 gatling: $(SIM_PACKAGE_DIR)/$(SIM_FILE)
-	JAVA_HOME=$(JAVA_HOME) $(GAT) -rsf gatling/resources -sf $(SIM_DIR) -bf $(GAT_DIR)/target/test-classes -s $(SIM_FULL_NAME) -rd "Simulation $(SIM_NAME)" $(GATLING_OPTIONS)
+	JAVA_HOME=$(JAVA_HOME) $(GAT) -rsf $(RES_DIR) -sf $(SIM_DIR) -bf $(GAT_DIR)/target/test-classes -s $(SIM_FULL_NAME) -rd "Simulation $(SIM_NAME)" $(GATLING_OPTIONS)
 
 # The following should probably not be used---it starts the job but under most shells
 # this process will not be listed by the `jobs` command. This makes it difficult
 # to kill the process when you want to end the load test
 gatling-music:
-	@/bin/sh -c 'CLUSTER_IP=$(INGRESS_IP) USERS=$(USERS) SIM_NAME=ReadMusicSim JAVA_HOME=$(JAVA_HOME) $(GAT) -rsf gatling/resources -sf $(SIM_DIR) -bf $(GAT_DIR)/target/test-classes -s $(SIM_FULL_NAME) -rd "Simulation $(SIM_NAME)" $(GATLING_OPTIONS) $(GAT_SUFFIX)'
+	@/bin/sh -c 'CLUSTER_IP=$(INGRESS_IP) USERS=$(USERS) SIM_NAME=ReadMusicSim JAVA_HOME=$(JAVA_HOME) $(GAT) -rsf $(RES_DIR) -sf $(SIM_DIR) -bf $(GAT_DIR)/target/test-classes -s $(SIM_FULL_NAME) -rd "Simulation $(SIM_NAME)" $(GATLING_OPTIONS) $(GAT_SUFFIX)'
 
 # Different approach from gatling-music but the same problems. Probably do not use this.
 gatling-user:
