@@ -28,9 +28,18 @@ LOG_DIR=logs
 
 all: s1 db
 
-deploy:
-	$(DK) run -t --publish 30000:30000 --detach --name s1 $(CREG)/$(REGID)/cmpt756s1:latest | tee s1.svc.log
-	$(DK) run -t --publish 30002:30002 --detach --name db $(CREG)/$(REGID)/cmpt756db:latest | tee db.svc.log
+deploy: s1 db
+	$(DK) run -t --publish 30000:30000 --detach --name s1 $(CREG)/$(REGID)/cmpt756s1:e3 | tee s1.svc.log
+	$(DK) run -t \
+		-e AWS_REGION="ZZ-AWS-REGION" \
+		-e AWS_ACCESS_KEY_ID="ZZ-AWS-ACCESS-KEY-ID" \
+		-e AWS_SECRET_ACCESS_KEY="ZZ-AWS-SECRET-ACCESS-KEY" \
+		-e AWS_SESSION_TOKEN="ZZ-AWS-SESSION-TOKEN" \
+            --publish 30002:30002 --detach --name db $(CREG)/$(REGID)/cmpt756db:e3 | tee db.svc.log
+
+scratch:
+	$(DK) stop `$(DK) ps -a -q --filter name="db"` | tee db.stop.log
+	$(DK) stop `$(DK) ps -a -q --filter name="s1"` | tee s1.stop.log
 
 clean:
 	rm $(LOG_DIR)/{s1,db}.{img,repo,svc}.log
@@ -38,14 +47,13 @@ clean:
 s1: $(LOG_DIR)/s1.repo.log
 	cp s1/appd.py s1/app.py
 
-
 db: $(LOG_DIR)/db.repo.log
 
-$(LOG_DIR)/s1.repo.log: s1/Dockerfile
-	$(DK) build -t $(CREG)/$(REGID)/cmpt756s1:latest s1 | tee $(LOG_DIR)/s1.img.log
-	$(DK) push $(CREG)/$(REGID)/cmpt756s1:latest | tee $(LOG_DIR)/s1.repo.log
+$(LOG_DIR)/s1.repo.log: s1/app.py s1/Dockerfile
+	$(DK) build -t $(CREG)/$(REGID)/cmpt756s1:e3 s1 | tee $(LOG_DIR)/s1.img.log
+	$(DK) push $(CREG)/$(REGID)/cmpt756s1:e3 | tee $(LOG_DIR)/s1.repo.log
 
-$(LOG_DIR)/db.repo.log: db/Dockerfile
-	$(DK) build -t $(CREG)/$(REGID)/cmpt756db:latest db | tee $(LOG_DIR)/db.img.log
-	$(DK) push $(CREG)/$(REGID)/cmpt756db:latest | tee $(LOG_DIR)/db.repo.log
+$(LOG_DIR)/db.repo.log: db/Dockerfile 
+	$(DK) build -t $(CREG)/$(REGID)/cmpt756db:e3 db | tee $(LOG_DIR)/db.img.log
+	$(DK) push $(CREG)/$(REGID)/cmpt756db:e3 | tee $(LOG_DIR)/db.repo.log
 
