@@ -70,7 +70,7 @@ def update():
     content = request.get_json()
     objtype = urllib.parse.unquote_plus(request.args.get('objtype'))
     objkey = urllib.parse.unquote_plus(request.args.get('objkey'))
-    table_name = objtype.capitalize()
+    table_name = objtype.capitalize()+"-"+access_key
     table_id = objtype + "_id"
     table = dynamodb.Table(table_name)
     expression = 'SET '
@@ -93,7 +93,7 @@ def read():
     # check header here
     objtype = urllib.parse.unquote_plus(request.args.get('objtype'))
     objkey = urllib.parse.unquote_plus(request.args.get('objkey'))
-    table_name = objtype.capitalize()
+    table_name = objtype.capitalize()+"-"+access_key
     table_id = objtype + "_id"
     table = dynamodb.Table(table_name)
     response = table.query(Select='ALL_ATTRIBUTES',
@@ -106,7 +106,7 @@ def write():
     headers = request.headers
     # check header here
     content = request.get_json()
-    table_name = content['objtype'].capitalize()
+    table_name = content['objtype'].capitalize()+"-"+access_key
     objtype = content['objtype']
     table_id = objtype + "_id"
     payload = {table_id: str(uuid.uuid4())}
@@ -128,7 +128,7 @@ def delete():
     # check header here
     objtype = urllib.parse.unquote_plus(request.args.get('objtype'))
     objkey = urllib.parse.unquote_plus(request.args.get('objkey'))
-    table_name = objtype.capitalize()
+    table_name = objtype.capitalize()+"-"+access_key
     table_id = objtype + "_id"
     table = dynamodb.Table(table_name)
     response = table.delete_item(Key={table_id: objkey})
