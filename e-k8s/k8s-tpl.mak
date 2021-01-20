@@ -163,7 +163,7 @@ showcontext:
 # --- dynamodb: Start the AWS DynamoDB service
 #
 dynamodb: cluster/cloudformationdynamodb.json
-	$(AWS) cloudformation create-stack --stack-name db --template-body file://$<
+	$(AWS) cloudformation create-stack --stack-name db-ZZ-AWS-ACCESS-KEY-ID --template-body file://$<
 
 # --- ls-tables: List the tables and their read/write units for all DynamodDB tables
 ls-tables:
