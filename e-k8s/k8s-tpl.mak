@@ -226,7 +226,7 @@ GAT_SUFFIX=2>&1 | head -18 &
 # Less convenient than gatling-music or gatling-user (below) but the resulting commands
 # from this target are listed by `jobs` and thus easy to kill.
 gatling-command:
-	@/bin/sh -c 'echo "CLUSTER_IP=$(INGRESS_IP) USERS=1 SIM_NAME=ReadMusicSim make -e -f k8s.mak gatling $(GAT_SUFFIX)"'
+	@/bin/sh -c 'echo "CLUSTER_IP=$(INGRESS_IP) USERS=1 SIM_NAME=ReadMusicSim make -e -f k8s.mak run-gatling $(GAT_SUFFIX)"'
 
 # ----------------------------------------------------------------------------------------
 # ------- Targets called by above. Not normally invoked directly from command line -------
@@ -331,7 +331,7 @@ cr:
 # The following may not even work.
 #
 # General Gatling target: Specify CLUSTER_IP, USERS, and SIM_NAME as environment variables. Full output.
-gatling: $(SIM_PACKAGE_DIR)/$(SIM_FILE)
+run-gatling:
 	JAVA_HOME=$(JAVA_HOME) $(GAT) -rsf $(RES_DIR) -sf $(SIM_DIR) -bf $(GAT_DIR)/target/test-classes -s $(SIM_FULL_NAME) -rd "Simulation $(SIM_NAME)" $(GATLING_OPTIONS)
 
 # The following should probably not be used---it starts the job but under most shells
@@ -342,7 +342,7 @@ gatling-music:
 
 # Different approach from gatling-music but the same problems. Probably do not use this.
 gatling-user:
-	@/bin/sh -c 'CLUSTER_IP=$(INGRESS_IP) USERS=$(USERS) SIM_NAME=ReadUserSim make -e -f k8s.mak gatling $(GAT_SUFFIX)'
+	@/bin/sh -c 'CLUSTER_IP=$(INGRESS_IP) USERS=$(USERS) SIM_NAME=ReadUserSim make -e -f k8s.mak run-gatling $(GAT_SUFFIX)'
 
 
 # ---------------------------------------------------------------------------------------
