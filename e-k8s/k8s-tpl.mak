@@ -163,13 +163,13 @@ showcontext:
 	$(KC) config get-contexts
 
 # Run the loader, rebuilding if necessary, starting DynamDB if necessary, building ConfigMaps
-loader: dynamodb-start $(LOG_DIR)/loader.repo.log cluster/loader.yaml
+loader: dynamodb-init $(LOG_DIR)/loader.repo.log cluster/loader.yaml
 	$(KC) -n $(APP_NS) delete --ignore-not-found=true jobs/cmpt756loader
 	tools/build-configmap.sh $(RES_DIR)/users.csv cluster/users-header.yaml | kubectl -n $(APP_NS) apply -f -
 	tools/build-configmap.sh $(RES_DIR)/music.csv cluster/music-header.yaml | kubectl -n $(APP_NS) apply -f -
 	$(KC) -n $(APP_NS) apply -f cluster/loader.yaml | tee $(LOG_DIR)/loader.log
 
-# --- dynamodb-start: Start the AWS DynamoDB service
+# --- dynamodb-init: set up our DynamoDB tables
 #
 dynamodb-init: $(LOG_DIR)/dynamodb-init.log
 
@@ -273,10 +273,10 @@ gw: cluster/service-gateway.yaml
 	$(KC) -n $(APP_NS) apply -f $< > $(LOG_DIR)/gw.log
 
 # Start DynamoDB at the default read and write rates
-$(LOG_DIR)/dynamodb-start.log: cluster/cloudformationdynamodb.json
+$(LOG_DIR)/dynamodb-init.log: cluster/cloudformationdynamodb.json
 	@# "|| true" suffix because command fails when stack already exists
 	@# (even with --on-failure DO_NOTHING, a nonzero error code is returned)
-	$(AWS) cloudformation create-stack --stack-name db-ZZ-AWS-ACCESS-KEY-ID --template-body file://$< || true | tee $(LOG_DIR)/dynamodb-start.log
+	$(AWS) cloudformation create-stack --stack-name db-ZZ-AWS-ACCESS-KEY-ID --template-body file://$< || true | tee $(LOG_DIR)/dynamodb-init.log
 
 # Update S1 and associated monitoring, rebuilding if necessary
 s1: $(LOG_DIR)/s1.repo.log cluster/s1.yaml cluster/s1-sm.yaml cluster/s1-vs.yaml
