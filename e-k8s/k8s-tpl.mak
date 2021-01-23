@@ -34,6 +34,7 @@ IC=istioctl
 # Override these by environment variables and `make -e`
 APP_VER_TAG=v1
 S2_VER=v1
+LOADER_VER=v1
 
 # Gatling parameters to be overridden by environment variables and `make -e`
 SIM_NAME=ReadUserSim
@@ -48,6 +49,7 @@ GATLING_OPTIONS=
 # Other Gatling parameters---you should not have to change these
 GAT=$(GAT_DIR)/bin/gatling.sh
 SIM_DIR=gatling/simulations
+RES_DIR=gatling/resources
 SIM_PACKAGE_DIR=$(SIM_DIR)/$(SIM_PACKAGE)
 SIM_FULL_NAME=$(SIM_PACKAGE).$(SIM_NAME)
 
@@ -160,10 +162,23 @@ reinstate:
 showcontext:
 	$(KC) config get-contexts
 
-# --- dynamodb: Start the AWS DynamoDB service
+# Run the loader, rebuilding if necessary, starting DynamDB if necessary, building ConfigMaps
+loader: dynamodb-start $(LOG_DIR)/loader.repo.log cluster/loader.yaml
+	$(KC) -n $(APP_NS) delete --ignore-not-found=true jobs/cmpt756loader
+	tools/build-configmap.sh $(RES_DIR)/users.csv cluster/users-header.yaml | kubectl -n $(APP_NS) apply -f -
+	tools/build-configmap.sh $(RES_DIR)/music.csv cluster/music-header.yaml | kubectl -n $(APP_NS) apply -f -
+	$(KC) -n $(APP_NS) apply -f cluster/loader.yaml | tee $(LOG_DIR)/loader.log
+
+# --- dynamodb-start: Start the AWS DynamoDB service
 #
-dynamodb: cluster/cloudformationdynamodb.json
-	$(AWS) cloudformation create-stack --stack-name db-ZZ-AWS-ACCESS-KEY-ID --template-body file://$<
+dynamodb-init: $(LOG_DIR)/dynamodb-init.log
+
+# --- dynamodb-stop: Stop the AWS DynamoDB service
+#
+dynamodb-clean:
+	$(AWS) cloudformation delete-stack --stack-name db-ZZ-AWS-ACCESS-KEY-ID || true | tee $(LOG_DIR)/dynamodb-clean.log
+	@# Rename DynamoDB log so dynamodb-init will force a restart but retain the log
+	/bin/mv -f $(LOG_DIR)/dynamodb-init.log $(LOG_DIR)/dynamodb-init-old.log
 
 # --- ls-tables: List the tables and their read/write units for all DynamodDB tables
 ls-tables:
@@ -211,7 +226,7 @@ GAT_SUFFIX=2>&1 | head -18 &
 # Less convenient than gatling-music or gatling-user (below) but the resulting commands
 # from this target are listed by `jobs` and thus easy to kill.
 gatling-command:
-	@/bin/sh -c 'echo "CLUSTER_IP=$(INGRESS_IP) USERS=1 SIM_NAME=ReadMusicSim make -e -f k8s.mak gatling $(GAT_SUFFIX)"'
+	@/bin/sh -c 'echo "CLUSTER_IP=$(INGRESS_IP) USERS=1 SIM_NAME=ReadMusicSim make -e -f k8s.mak run-gatling $(GAT_SUFFIX)"'
 
 # ----------------------------------------------------------------------------------------
 # ------- Targets called by above. Not normally invoked directly from command line -------
@@ -257,11 +272,17 @@ monvs: cluster/monitoring-virtualservice.yaml
 gw: cluster/service-gateway.yaml
 	$(KC) -n $(APP_NS) apply -f $< > $(LOG_DIR)/gw.log
 
+# Start DynamoDB at the default read and write rates
+$(LOG_DIR)/dynamodb-start.log: cluster/cloudformationdynamodb.json
+	@# "|| true" suffix because command fails when stack already exists
+	@# (even with --on-failure DO_NOTHING, a nonzero error code is returned)
+	$(AWS) cloudformation create-stack --stack-name db-ZZ-AWS-ACCESS-KEY-ID --template-body file://$< || true | tee $(LOG_DIR)/dynamodb-start.log
+
 # Update S1 and associated monitoring, rebuilding if necessary
 s1: $(LOG_DIR)/s1.repo.log cluster/s1.yaml cluster/s1-sm.yaml cluster/s1-vs.yaml
-	$(KC) -n $(APP_NS) apply -f cluster/s1.yaml > $(LOG_DIR)/s1.log
-	$(KC) -n $(APP_NS) apply -f cluster/s1-sm.yaml >> $(LOG_DIR)/s1.log
-	$(KC) -n $(APP_NS) apply -f cluster/s1-vs.yaml >> $(LOG_DIR)/s1.log
+	$(KC) -n $(APP_NS) apply -f cluster/s1.yaml | tee $(LOG_DIR)/s1.log
+	$(KC) -n $(APP_NS) apply -f cluster/s1-sm.yaml | tee -a $(LOG_DIR)/s1.log
+	$(KC) -n $(APP_NS) apply -f cluster/s1-vs.yaml | tee -a $(LOG_DIR)/s1.log
 
 # Update S2 and associated monitoring, rebuilding if necessary
 s2: rollout-s2 cluster/s2-svc.yaml cluster/s2-sm.yaml cluster/s2-vs-$(S2_VER).yaml
@@ -271,11 +292,11 @@ s2: rollout-s2 cluster/s2-svc.yaml cluster/s2-sm.yaml cluster/s2-vs-$(S2_VER).ya
 
 # Update DB and associated monitoring, rebuilding if necessary
 db: $(LOG_DIR)/db.repo.log cluster/awscred.yaml cluster/dynamodb-service-entry.yaml cluster/db.yaml cluster/db-sm.yaml cluster/db-vs.yaml
-	$(KC) -n $(APP_NS) apply -f cluster/awscred.yaml > $(LOG_DIR)/db.log
-	$(KC) -n $(APP_NS) apply -f cluster/dynamodb-service-entry.yaml >> $(LOG_DIR)/db.log
-	$(KC) -n $(APP_NS) apply -f cluster/db.yaml >> $(LOG_DIR)/db.log
-	$(KC) -n $(APP_NS) apply -f cluster/db-sm.yaml >> $(LOG_DIR)/db.log
-	$(KC) -n $(APP_NS) apply -f cluster/db-vs.yaml >> $(LOG_DIR)/db.log
+	$(KC) -n $(APP_NS) apply -f cluster/awscred.yaml | tee $(LOG_DIR)/db.log
+	$(KC) -n $(APP_NS) apply -f cluster/dynamodb-service-entry.yaml | tee -a $(LOG_DIR)/db.log
+	$(KC) -n $(APP_NS) apply -f cluster/db.yaml | tee -a $(LOG_DIR)/db.log
+	$(KC) -n $(APP_NS) apply -f cluster/db-sm.yaml | tee -a $(LOG_DIR)/db.log
+	$(KC) -n $(APP_NS) apply -f cluster/db-vs.yaml | tee -a $(LOG_DIR)/db.log
 
 # Build & push the images up to the CR
 cri: $(LOG_DIR)/s1.repo.log $(LOG_DIR)/s2-$(S2_VER).repo.log $(LOG_DIR)/db.repo.log
@@ -295,6 +316,11 @@ $(LOG_DIR)/db.repo.log: db/Dockerfile db/app.py db/requirements.txt
 	$(DK) build -t $(CREG)/$(REGID)/cmpt756db:$(APP_VER_TAG) db | tee $(LOG_DIR)/db.img.log
 	$(DK) push $(CREG)/$(REGID)/cmpt756db:$(APP_VER_TAG) | tee $(LOG_DIR)/db.repo.log
 
+# Build the loader
+$(LOG_DIR)/loader.repo.log: loader/app.py loader/requirements.txt loader/Dockerfile
+	$(DK) image build -t $(CREG)/$(REGID)/cmpt756loader:$(LOADER_VER) loader  | tee $(LOG_DIR)/loader.img.log
+	$(DK) push $(CREG)/$(REGID)/cmpt756loader:$(LOADER_VER) | tee $(LOG_DIR)/loader.repo.log
+
 # Push all the container images to the container registry
 # This isn't often used because the individual build targets also push
 # the updated images to the registry
@@ -308,18 +334,18 @@ cr:
 # The following may not even work.
 #
 # General Gatling target: Specify CLUSTER_IP, USERS, and SIM_NAME as environment variables. Full output.
-gatling: $(SIM_PACKAGE_DIR)/$(SIM_FILE)
-	JAVA_HOME=$(JAVA_HOME) $(GAT) -rsf gatling/resources -sf $(SIM_DIR) -bf $(GAT_DIR)/target/test-classes -s $(SIM_FULL_NAME) -rd "Simulation $(SIM_NAME)" $(GATLING_OPTIONS)
+run-gatling:
+	JAVA_HOME=$(JAVA_HOME) $(GAT) -rsf $(RES_DIR) -sf $(SIM_DIR) -bf $(GAT_DIR)/target/test-classes -s $(SIM_FULL_NAME) -rd "Simulation $(SIM_NAME)" $(GATLING_OPTIONS)
 
 # The following should probably not be used---it starts the job but under most shells
 # this process will not be listed by the `jobs` command. This makes it difficult
 # to kill the process when you want to end the load test
 gatling-music:
-	@/bin/sh -c 'CLUSTER_IP=$(INGRESS_IP) USERS=$(USERS) SIM_NAME=ReadMusicSim JAVA_HOME=$(JAVA_HOME) $(GAT) -rsf gatling/resources -sf $(SIM_DIR) -bf $(GAT_DIR)/target/test-classes -s $(SIM_FULL_NAME) -rd "Simulation $(SIM_NAME)" $(GATLING_OPTIONS) $(GAT_SUFFIX)'
+	@/bin/sh -c 'CLUSTER_IP=$(INGRESS_IP) USERS=$(USERS) SIM_NAME=ReadMusicSim JAVA_HOME=$(JAVA_HOME) $(GAT) -rsf $(RES_DIR) -sf $(SIM_DIR) -bf $(GAT_DIR)/target/test-classes -s $(SIM_FULL_NAME) -rd "Simulation $(SIM_NAME)" $(GATLING_OPTIONS) $(GAT_SUFFIX)'
 
 # Different approach from gatling-music but the same problems. Probably do not use this.
 gatling-user:
-	@/bin/sh -c 'CLUSTER_IP=$(INGRESS_IP) USERS=$(USERS) SIM_NAME=ReadUserSim make -e -f k8s.mak gatling $(GAT_SUFFIX)'
+	@/bin/sh -c 'CLUSTER_IP=$(INGRESS_IP) USERS=$(USERS) SIM_NAME=ReadUserSim make -e -f k8s.mak run-gatling $(GAT_SUFFIX)'
 
 
 # ---------------------------------------------------------------------------------------

@@ -4,6 +4,7 @@ Sample application---database service.
 """
 
 # Standard library modules
+import base64
 import logging
 import os
 import sys
@@ -43,6 +44,9 @@ secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
 
 # this is only needed for starter accounts
 session_token = os.getenv('AWS_SESSION_TOKEN')
+
+# Must be presented to authorize call to `/load`
+loader_token = os.getenv('SVC_LOADER_TOKEN')
 
 # if session_token is not present in the environment, assume it is a
 # standard acct which doesn't need one; otherwise, add it on.
@@ -120,6 +124,68 @@ def write():
         returnval = {"message": "fail"}
     return json.dumps(
         ({table_id: payload[table_id]}, returnval)['returnval' in globals()])
+
+
+def decode_auth_token(token):
+    '''Given an auth token in Base64 encoding, return the original string'''
+    return base64.standard_b64decode(token).decode()
+
+
+def load_auth(headers):
+    '''Return True if caller authorized to do a `/load` '''
+    global loader_token
+    if 'Authorization' not in headers:
+        return False
+    # Auth string is 'Basic ' concatenated with base64 encoding of uname:passwd
+    auth_string = headers['Authorization'].split()[1]
+    name, pwd = decode_auth_token(auth_string).split(':')
+    if name != 'svc-loader' or pwd != loader_token:
+        return False
+    return True
+
+
+@bp.route('/load', methods=['POST'])
+def load():
+    '''
+    Load a value into the database
+
+    This differs from write() in the following ways:
+    1. The caller must specify the UUID in `content`. http_status_code
+       400 is returned if this condition is not met.
+    2. The caller must include an "Authorization" header accepted
+       by load_auth(). A 401 status is returned for authorization failure.
+    3. If the database returns a non-200 status code, this routine
+       responds with an {http_status_code: status} object.
+
+    This routine potentially could share a common subroutine with
+    write() but the HTTP error processing in write() seems wrong
+    so this routine has its own code.
+    '''
+    headers = request.headers
+    if not load_auth(headers):
+        return Response(
+            json.dumps({"http_status_code": 401,
+                        "reason": "Invalid authorization for /load"}),
+            status=401,
+            mimetype='application/json')
+
+    content = request.get_json()
+    if 'uuid' not in content:
+        return json.dumps({"http_status_code": 400, "reason": 'Missing uuid'})
+    table_name = content['objtype'].capitalize()
+    objtype = content['objtype']
+    table_id = objtype + "_id"
+    payload = {table_id: content['uuid']}
+    del content['objtype']
+    del content['uuid']
+    for k in content.keys():
+        payload[k] = content[k]
+    table = dynamodb.Table(table_name)
+    response = table.put_item(Item=payload)
+    status = response['ResponseMetadata']['HTTPStatusCode']
+    if status != 200:
+        return json.dumps({"http_status_code": status})
+    return json.dumps({table_id: payload[table_id]})
 
 
 @bp.route('/delete', methods=['DELETE'])

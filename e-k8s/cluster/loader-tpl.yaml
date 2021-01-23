@@ -1,0 +1,45 @@
+# kubenetes yaml to deploy the loader
+#
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cmpt756loader
+  labels:
+    app: cmpt756loader
+spec:
+  template:
+    metadata:
+      labels:
+        app: cmpt756loader
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      # svc-loader defined at DB service creation
+      serviceAccountName: svc-loader
+      containers:
+      - name: loader
+        imagePullPolicy: Always
+        image: ZZ-CR-ID/ZZ-REG-ID/cmpt756loader:v1
+        env:
+        - name: SVC_LOADER_TOKEN
+          valueFrom:
+            secretKeyRef:
+              # The known name of secret/svc-loader-token
+              name: svc-loader-token
+              key: token
+        volumeMounts:
+        - name: music
+          mountPath: "/data/music"
+          readOnly: true
+        - name: users
+          mountPath: "/data/users"
+          readOnly: true
+      volumes:
+      - name: music
+        configMap:
+          name: music
+      - name: users
+        configMap:
+          name: users
+      restartPolicy: Never
+  backoffLimit: 0
