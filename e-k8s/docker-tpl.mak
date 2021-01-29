@@ -45,15 +45,14 @@ clean:
 	rm $(LOG_DIR)/{s1,db}.{img,repo,svc}.log
 
 s1: $(LOG_DIR)/s1.repo.log
-	cp s1/appd.py s1/app.py
 
 db: $(LOG_DIR)/db.repo.log
 
-$(LOG_DIR)/s1.repo.log: s1/app.py s1/Dockerfile
+$(LOG_DIR)/s1.repo.log: s1/appd.py s1/Dockerfile
+	cp s1/appd.py s1/app.py
 	$(DK) build -t $(CREG)/$(REGID)/cmpt756s1:e3 s1 | tee $(LOG_DIR)/s1.img.log
 	$(DK) push $(CREG)/$(REGID)/cmpt756s1:e3 | tee $(LOG_DIR)/s1.repo.log
 
-$(LOG_DIR)/db.repo.log: db/Dockerfile 
+$(LOG_DIR)/db.repo.log: db/Dockerfile
 	$(DK) build -t $(CREG)/$(REGID)/cmpt756db:e3 db | tee $(LOG_DIR)/db.img.log
 	$(DK) push $(CREG)/$(REGID)/cmpt756db:e3 | tee $(LOG_DIR)/db.repo.log
-
