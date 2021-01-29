@@ -6,16 +6,19 @@
 ZZ-CR-ID=ghcr.io
 #
 # Your userid for the container registry named above
+# As we are using GitHub's container registry, this is your GitHub username (lowercase)
 #
 ZZ-REG-ID=
 #
 # The home directory for the version of Java to run Gatling.
 # Typically you can just use your regular Java version but
 # a few versions of Java cannot run Gatling
+# This path must *not* contain any whitespace!
 #
 ZZ-JAVA-HOME=
 #
 # The directory where Gatling is installed
+# Again, this path must *not* contain any whitespace!
 #
 ZZ-GAT-DIR=
 #

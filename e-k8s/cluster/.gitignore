@@ -9,3 +9,4 @@ s2-nohealth.yaml
 dynamodb-service-entry.yaml
 awscred.yaml
 tpl-vars.txt
+cloudformationdynamodb.json
