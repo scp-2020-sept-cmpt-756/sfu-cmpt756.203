@@ -153,10 +153,9 @@ lsd:
 # --- reinstate: Reinstate provisioning on a new set of worker nodes
 # Do this after you do `up` on a cluster that implements that operation.
 # AWS implements `up` and `down`; other cloud vendors may not.
-reinstate:
+reinstate: istio
 	$(KC) create ns $(APP_NS) | tee $(LOG_DIR)/reinstate.log
 	$(KC) label ns $(APP_NS) istio-injection=enabled | tee -a $(LOG_DIR)/reinstate.log
-	$(IC) install --set profile=demo | tee -a $(LOG_DIR)/reinstate.log
 
 # --- showcontext: Display current context
 showcontext:
