@@ -176,7 +176,7 @@ dynamodb-init: $(LOG_DIR)/dynamodb-init.log
 # --- dynamodb-stop: Stop the AWS DynamoDB service
 #
 dynamodb-clean:
-	$(AWS) cloudformation delete-stack --stack-name db-ZZ-AWS-ACCESS-KEY-ID || true | tee $(LOG_DIR)/dynamodb-clean.log
+	$(AWS) cloudformation delete-stack --stack-name db-ZZ-REG-ID || true | tee $(LOG_DIR)/dynamodb-clean.log
 	@# Rename DynamoDB log so dynamodb-init will force a restart but retain the log
 	/bin/mv -f $(LOG_DIR)/dynamodb-init.log $(LOG_DIR)/dynamodb-init-old.log
 
@@ -276,7 +276,7 @@ gw: cluster/service-gateway.yaml
 $(LOG_DIR)/dynamodb-init.log: cluster/cloudformationdynamodb.json
 	@# "|| true" suffix because command fails when stack already exists
 	@# (even with --on-failure DO_NOTHING, a nonzero error code is returned)
-	$(AWS) cloudformation create-stack --stack-name db-ZZ-AWS-ACCESS-KEY-ID --template-body file://$< || true | tee $(LOG_DIR)/dynamodb-init.log
+	$(AWS) cloudformation create-stack --stack-name db-ZZ-REG-ID --template-body file://$< || true | tee $(LOG_DIR)/dynamodb-init.log
 
 # Update S1 and associated monitoring, rebuilding if necessary
 s1: $(LOG_DIR)/s1.repo.log cluster/s1.yaml cluster/s1-sm.yaml cluster/s1-vs.yaml
