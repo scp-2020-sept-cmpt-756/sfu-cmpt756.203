@@ -6,7 +6,7 @@
 # Step 0: Check that necessary tools are in command path
 #
 function check_command () {
-  which -s ${1}
+  which ${1} >> /dev/null
   if [[ $? -ne 0 ]]
   then
     echo "Warning: ${1} is not in the search path"
