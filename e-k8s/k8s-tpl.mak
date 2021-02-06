@@ -140,27 +140,27 @@ extern: showcontext
 
 # --- log-X: show the log of a particular service
 log-s1:
-	$(KC) -n $(NS) logs deployment/cmpt756s1 --container cmpt756s1
+	$(KC) -n $(APP_NS) logs deployment/cmpt756s1 --container cmpt756s1
 
 log-s2:
-	$(KC) -n $(NS) logs deployment/cmpt756s2 --container cmpt756s2
+	$(KC) -n $(APP_NS) logs deployment/cmpt756s2 --container cmpt756s2
 
 log-db:
-	$(KC) -n $(NS) logs deployment/cmpt756db --container cmpt756db
+	$(KC) -n $(APP_NS) logs deployment/cmpt756db --container cmpt756db
 
 
 # --- shell-X: hint for shell into a particular service
 shell-s1:
 	@echo Use the following command line to drop into the s1 service:
-	@echo   $(KC) -n $(NS) exec -it deployment/cmpt756s1 --container cmpt756s1 -- bash
+	@echo   $(KC) -n $(APP_NS) exec -it deployment/cmpt756s1 --container cmpt756s1 -- bash
 
 shell-s2:
 	@echo Use the following command line to drop into the s2 service:
-	@echo   $(KC) -n $(NS) exec -it deployment/cmpt756s2 --container cmpt756s2 -- bash
+	@echo   $(KC) -n $(APP_NS) exec -it deployment/cmpt756s2 --container cmpt756s2 -- bash
 
 shell-db:
 	@echo Use the following command line to drop into the db service:
-	@echo   $(KC) -n $(NS) exec -it deployment/cmpt756db --container cmpt756db -- bash
+	@echo   $(KC) -n $(APP_NS) exec -it deployment/cmpt756db --container cmpt756db -- bash
 
 # --- lsa: List services in all namespaces
 lsa: showcontext
