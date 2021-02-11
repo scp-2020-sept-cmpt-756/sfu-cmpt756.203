@@ -89,7 +89,7 @@ ls: showcontext lsnc
 # use this to show versions available for your ZONE
 # refer: https://cloud.google.com/kubernetes-engine/versioning#available_versions
 lskver:
-        $(GC) container get-server-config --zone $(ZONE)
+	$(GC) container get-server-config --zone $(ZONE)
 
 # Show all GCP clusters
 lsnc:
