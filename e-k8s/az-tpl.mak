@@ -30,10 +30,11 @@ AZ_CTX=az756
 
 # Standard_A2_v2: 2 vCore & 4 GiB RAM
 NTYPE=Standard_A2_v2
+NUM_NODES=3
 REGION=canadacentral
 # use $(AKS) get-versions --location $(REGION) to find available versions
 # This version is supported for canadacentral
-KVER=1.19.3
+KVER=1.21.1
 
 #
 # Note that get-credentials fetches the access credentials for the managed Kubernetes cluster and inserts it
@@ -49,7 +50,7 @@ KVER=1.19.3
 start: showcontext
 	date | tee  $(LOG_DIR)/az-start.log
 	$(AZ) group create -o table --name $(GRP) --location $(REGION) | tee -a $(LOG_DIR)/az-start.log
-	$(AKS) create -o table --resource-group $(GRP) --name $(CLUSTER_NAME) --kubernetes-version $(KVER) --node-count 2 --node-vm-size $(NTYPE) --generate-ssh-keys | tee -a $(LOG_DIR)/az-start.log
+	$(AKS) create -o table --resource-group $(GRP) --name $(CLUSTER_NAME) --kubernetes-version $(KVER) --node-count $(NUM_NODES) --node-vm-size $(NTYPE) --generate-ssh-keys | tee -a $(LOG_DIR)/az-start.log
 	$(AKS) get-credentials --resource-group $(GRP) --name $(CLUSTER_NAME) --context $(AZ_CTX) --overwrite-existing | tee -a $(LOG_DIR)/az-start.log
 	$(AKS) list -o table | tee -a $(LOG_DIR)/az-start.log
 	date | tee -a $(LOG_DIR)/az-start.log

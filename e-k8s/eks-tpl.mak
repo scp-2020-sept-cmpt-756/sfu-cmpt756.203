@@ -57,7 +57,7 @@ lsnc: lscl
 
 # Show all AWS clusters
 lscl:
-	$(EKS) get cluster --region $(REGION)
+	$(EKS) get cluster --region $(REGION) -v 0
 
 status: showcontext
 	$(EKS) get cluster --region $(REGION) | tee $(LOG_DIR)/eks-status.log

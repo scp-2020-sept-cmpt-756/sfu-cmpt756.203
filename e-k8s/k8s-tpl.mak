@@ -77,7 +77,9 @@ templates:
 # 1. Templates have been instantiated (make -f k8s-tpl.mak templates)
 # 2. Current context is a running Kubernetes cluster (make -f {az,eks,gcp,mk}.mak start)
 #
-provision: istio prom kiali deploy
+#  Nov 2021: Kiali is causing problems so do not deploy
+#provision: istio prom kiali deploy
+provision: istio prom deploy
 
 # --- deploy: Deploy and monitor the three microservices
 # Use `provision` to deploy the entire stack (including Istio, Prometheus, ...).
@@ -258,8 +260,8 @@ gatling-command:
 
 # Install Prometheus stack by calling `obs.mak` recursively
 prom:
-	make -f obs.mak init-helm
-	make -f obs.mak install-prom
+	make -f obs.mak init-helm --no-print-directory
+	make -f obs.mak install-prom --no-print-directory
 
 # Install Kiali operator and Kiali by calling `obs.mak` recursively
 # Waits for Kiali to be created and begin running. This wait is required
@@ -274,7 +276,7 @@ kiali:
 
 # Install Istio
 istio:
-	$(IC) install --set profile=demo --set hub=gcr.io/istio-release | tee -a $(LOG_DIR)/mk-reinstate.log
+	$(IC) install -y --set profile=demo --set hub=gcr.io/istio-release | tee -a $(LOG_DIR)/mk-reinstate.log
 
 # Create and configure the application namespace
 appns:

@@ -34,8 +34,10 @@ all: install-prom install-kiali
 
 
 # add the latest active repo for Prometheus
+# Only needs to be done once for any user but is idempotent
 init-helm:
 	$(HELM) repo add prometheus-community https://prometheus-community.github.io/helm-charts
+	$(HELM) repo update
 
 # note that the name $(RELEASE) is discretionary; it is used to reference the install 
 # Grafana is included within this Prometheus package

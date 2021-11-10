@@ -17,7 +17,7 @@ check_command 'kubectl'
 check_command 'istioctl'
 check_command 'helm'
 check_command 'curl'
-# AWS command is required to run anywhere, to control DynamoDB
+# AWS command is required for all vendors, to control DynamoDB
 check_command 'aws'
 #
 # Step 1: Strip comments from file listing variables
