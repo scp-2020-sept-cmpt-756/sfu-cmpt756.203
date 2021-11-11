@@ -10,7 +10,4 @@ then
 fi
 
 export CLUSTER_IP=`tools/getip.sh kubectl istio-system svc/istio-ingressgateway`
-cd tools/gatling
-USERS=${1} SIM_NAME=${2} make -e -f Makefile.mak run
-# Alternative that was not as good
-#USERS=${1} SIM_NAME=${2} make -e -f k8s.mak run-gatling 2>&1 | head -15 &
+USERS=${1} SIM_NAME=${2} /opt/gatling/bin/gatling.sh -s proj756.${2}
