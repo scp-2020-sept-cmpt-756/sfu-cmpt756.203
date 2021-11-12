@@ -302,6 +302,8 @@ $(LOG_DIR)/dynamodb-init.log: cluster/cloudformationdynamodb.json
 	@# "|| true" suffix because command fails when stack already exists
 	@# (even with --on-failure DO_NOTHING, a nonzero error code is returned)
 	$(AWS) cloudformation create-stack --stack-name db-ZZ-REG-ID --template-body file://$< || true | tee $(LOG_DIR)/dynamodb-init.log
+	# Must give DynamoDB time to create the tables before running the loader
+	sleep 20
 
 # Update S1 and associated monitoring, rebuilding if necessary
 s1: $(LOG_DIR)/s1.repo.log cluster/s1.yaml cluster/s1-sm.yaml cluster/s1-vs.yaml
