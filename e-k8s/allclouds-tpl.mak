@@ -25,5 +25,5 @@ ls:
 	@echo "Background Gatling jobs running"
 	@tools/list-gatling.sh
 	@echo
-	@echo 'Run "tools/kill-gatling.sh" to terminate the Gatling jobs'
+	@echo 'Run "kill -9 PROCESS-ID-LIST" to terminate the Gatling jobs'
 	@echo
