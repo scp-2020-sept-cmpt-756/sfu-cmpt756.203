@@ -74,7 +74,7 @@ ls: showcontext lsnc
 
 # Show all Azure clusters
 lsnc:
-	$(AKS) list -o table
+	$(AKS) list -o table || true
 
 status: showcontext
 	$(AKS) list -o table | tee $(LOG_DIR)/az-status.log

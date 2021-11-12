@@ -12,7 +12,6 @@ function check_command () {
     echo "Warning: ${1} is not in the search path"
   fi
 }
-check_command 'docker'
 check_command 'kubectl'
 check_command 'istioctl'
 check_command 'helm'
