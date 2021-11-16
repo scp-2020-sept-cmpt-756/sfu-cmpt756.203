@@ -2,7 +2,7 @@
 # Start the CMPT 756 environment
 REGISTRY=ghcr.io
 USERID=tedkirkpatrick
-VER=v1.0
+VER=v1.0beta2-amd64
 docker container run -it --rm \
   -v ${HOME}/.aws:/root/.aws \
   -v ${HOME}/.azure:/root/.azure \
