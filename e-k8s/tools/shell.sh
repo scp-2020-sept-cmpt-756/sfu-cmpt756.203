@@ -13,4 +13,5 @@ docker container run -it --rm \
   -v ${PWD}/gatling:/opt/gatling/user-files \
   -v ${PWD}/gatling/target:/opt/gatling/target \
   -v ${PWD}:/home/k8s \
+  -e TZ=Canada/Pacific \
   ${REGISTRY}/${USERID}/cmpt-756-tools:${VER}
