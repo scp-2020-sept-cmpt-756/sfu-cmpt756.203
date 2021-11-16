@@ -1,8 +1,15 @@
 #!/usr/bin/env bash
 # Start the CMPT 756 environment
+set -o nounset
+set -o errexit
+if [[ $# -eq 1 ]]
+then
+  VER=${1}
+else
+  VER=v1.0beta2-amd64
+fi
 REGISTRY=ghcr.io
 USERID=tedkirkpatrick
-VER=v1.0beta2-amd64
 docker container run -it --rm \
   -v ${HOME}/.aws:/root/.aws \
   -v ${HOME}/.azure:/root/.azure \
