@@ -6,7 +6,8 @@ if [[ $# -eq 1 ]]
 then
   VER=${1}
 else
-  VER=v1.0beta2-amd64
+  # Let registry select the appropriate architecture
+  VER=v1.0beta2
 fi
 REGISTRY=ghcr.io
 USERID=tedkirkpatrick
