@@ -73,7 +73,7 @@ MUSIC_ID=2995bc8b-d872-4dd1-b396-93fde2f4bfff
 
 # it's convenient to have a second set of id to test deletion (DELETE uses these id with the suffix of 2)
 USER_ID2=9175a76f-7c4d-4a3e-be57-65856c6bb77e
-MUISC_ID2=8ed63e4f-3b1e-47f8-beb8-3604516e5a2d
+MUSIC_ID2=8ed63e4f-3b1e-47f8-beb8-3604516e5a2d
 
 
 # POST is used for user (apipost) or music (apimusic) to create a new record

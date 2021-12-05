@@ -6,18 +6,9 @@
 ZZ-CR-ID=ghcr.io
 #
 # Your userid for the container registry named above
+# As we are using GitHub's container registry, this is your GitHub username (lowercase)
 #
 ZZ-REG-ID=
-#
-# The home directory for the version of Java to run Gatling.
-# Typically you can just use your regular Java version but
-# a few versions of Java cannot run Gatling
-#
-ZZ-JAVA-HOME=
-#
-# The directory where Gatling is installed
-#
-ZZ-GAT-DIR=
 #
 # If you are running DynamoDB from an AWS starter ID, you must specify us-east-1
 # as your region.  If you are running from a regular AWS ID, you may specify

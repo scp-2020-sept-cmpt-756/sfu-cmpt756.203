@@ -4,7 +4,7 @@
       "tableMusic": {
         "Type": "AWS::DynamoDB::Table",
         "Properties": {
-          "TableName": "Music",
+          "TableName": "Music-ZZ-REG-ID",
           "AttributeDefinitions": [
             {
               "AttributeName": "music_id",
@@ -26,7 +26,7 @@
       "tableUsers": {
         "Type": "AWS::DynamoDB::Table",
         "Properties": {
-          "TableName": "User",
+          "TableName": "User-ZZ-REG-ID",
           "AttributeDefinitions": [
             {
               "AttributeName": "user_id",
@@ -46,5 +46,5 @@
         }
       }
     },
-    "Description": "DynamoDB"
+    "Description": "DynamoDB tables for ZZ-AWS-ACCESS-KEY-ID"
   }

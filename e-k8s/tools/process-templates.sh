@@ -6,18 +6,17 @@
 # Step 0: Check that necessary tools are in command path
 #
 function check_command () {
-  which -s ${1}
+  which ${1} >> /dev/null
   if [[ $? -ne 0 ]]
   then
     echo "Warning: ${1} is not in the search path"
   fi
 }
-check_command 'docker'
 check_command 'kubectl'
 check_command 'istioctl'
 check_command 'helm'
 check_command 'curl'
-# AWS command is required to run anywhere, to control DynamoDB
+# AWS command is required for all vendors, to control DynamoDB
 check_command 'aws'
 #
 # Step 1: Strip comments from file listing variables

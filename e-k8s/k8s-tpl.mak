@@ -77,7 +77,9 @@ templates:
 # 1. Templates have been instantiated (make -f k8s-tpl.mak templates)
 # 2. Current context is a running Kubernetes cluster (make -f {az,eks,gcp,mk}.mak start)
 #
-provision: istio prom kiali deploy
+#  Nov 2021: Kiali is causing problems so do not deploy
+#provision: istio prom kiali deploy
+provision: istio prom deploy
 
 # --- deploy: Deploy and monitor the three microservices
 # Use `provision` to deploy the entire stack (including Istio, Prometheus, ...).
@@ -138,6 +140,30 @@ dashboard: showcontext
 extern: showcontext
 	$(KC) -n $(ISTIO_NS) get svc istio-ingressgateway
 
+# --- log-X: show the log of a particular service
+log-s1:
+	$(KC) -n $(APP_NS) logs deployment/cmpt756s1 --container cmpt756s1
+
+log-s2:
+	$(KC) -n $(APP_NS) logs deployment/cmpt756s2 --container cmpt756s2
+
+log-db:
+	$(KC) -n $(APP_NS) logs deployment/cmpt756db --container cmpt756db
+
+
+# --- shell-X: hint for shell into a particular service
+shell-s1:
+	@echo Use the following command line to drop into the s1 service:
+	@echo   $(KC) -n $(APP_NS) exec -it deployment/cmpt756s1 --container cmpt756s1 -- bash
+
+shell-s2:
+	@echo Use the following command line to drop into the s2 service:
+	@echo   $(KC) -n $(APP_NS) exec -it deployment/cmpt756s2 --container cmpt756s2 -- bash
+
+shell-db:
+	@echo Use the following command line to drop into the db service:
+	@echo   $(KC) -n $(APP_NS) exec -it deployment/cmpt756db --container cmpt756db -- bash
+
 # --- lsa: List services in all namespaces
 lsa: showcontext
 	$(KC) get svc --all-namespaces
@@ -153,32 +179,31 @@ lsd:
 # --- reinstate: Reinstate provisioning on a new set of worker nodes
 # Do this after you do `up` on a cluster that implements that operation.
 # AWS implements `up` and `down`; other cloud vendors may not.
-reinstate:
+reinstate: istio
 	$(KC) create ns $(APP_NS) | tee $(LOG_DIR)/reinstate.log
 	$(KC) label ns $(APP_NS) istio-injection=enabled | tee -a $(LOG_DIR)/reinstate.log
-	$(IC) install --set profile=demo | tee -a $(LOG_DIR)/reinstate.log
 
 # --- showcontext: Display current context
 showcontext:
 	$(KC) config get-contexts
 
 # Run the loader, rebuilding if necessary, starting DynamDB if necessary, building ConfigMaps
-loader: dynamodb-start $(LOG_DIR)/loader.repo.log cluster/loader.yaml
+loader: dynamodb-init $(LOG_DIR)/loader.repo.log cluster/loader.yaml
 	$(KC) -n $(APP_NS) delete --ignore-not-found=true jobs/cmpt756loader
 	tools/build-configmap.sh $(RES_DIR)/users.csv cluster/users-header.yaml | kubectl -n $(APP_NS) apply -f -
 	tools/build-configmap.sh $(RES_DIR)/music.csv cluster/music-header.yaml | kubectl -n $(APP_NS) apply -f -
 	$(KC) -n $(APP_NS) apply -f cluster/loader.yaml | tee $(LOG_DIR)/loader.log
 
-# --- dynamodb-start: Start the AWS DynamoDB service
+# --- dynamodb-init: set up our DynamoDB tables
 #
-dynamodb-start: $(LOG_DIR)/dynamodb-start.log
+dynamodb-init: $(LOG_DIR)/dynamodb-init.log
 
 # --- dynamodb-stop: Stop the AWS DynamoDB service
 #
-dynamodb-stop:
-	$(AWS) cloudformation delete-stack --stack-name db || true | tee $(LOG_DIR)/dynamodb-stop.log
-	@# Rename DynamoDB log so dynamodb-start will force a restart but retain the log
-	/bin/mv -f $(LOG_DIR)/dynamodb-start.log $(LOG_DIR)/dynamodb-start-old.log
+dynamodb-clean:
+	$(AWS) cloudformation delete-stack --stack-name db-ZZ-REG-ID || true | tee $(LOG_DIR)/dynamodb-clean.log
+	@# Rename DynamoDB log so dynamodb-init will force a restart but retain the log
+	/bin/mv -f $(LOG_DIR)/dynamodb-init.log $(LOG_DIR)/dynamodb-init-old.log
 
 # --- ls-tables: List the tables and their read/write units for all DynamodDB tables
 ls-tables:
@@ -235,8 +260,8 @@ gatling-command:
 
 # Install Prometheus stack by calling `obs.mak` recursively
 prom:
-	make -f obs.mak init-helm
-	make -f obs.mak install-prom
+	make -f obs.mak init-helm --no-print-directory
+	make -f obs.mak install-prom --no-print-directory
 
 # Install Kiali operator and Kiali by calling `obs.mak` recursively
 # Waits for Kiali to be created and begin running. This wait is required
@@ -251,7 +276,7 @@ kiali:
 
 # Install Istio
 istio:
-	$(IC) install --set profile=demo --set hub=gcr.io/istio-release | tee -a $(LOG_DIR)/mk-reinstate.log
+	$(IC) install -y --set profile=demo --set hub=gcr.io/istio-release | tee -a $(LOG_DIR)/mk-reinstate.log
 
 # Create and configure the application namespace
 appns:
@@ -273,10 +298,12 @@ gw: cluster/service-gateway.yaml
 	$(KC) -n $(APP_NS) apply -f $< > $(LOG_DIR)/gw.log
 
 # Start DynamoDB at the default read and write rates
-$(LOG_DIR)/dynamodb-start.log: cluster/cloudformationdynamodb.json
+$(LOG_DIR)/dynamodb-init.log: cluster/cloudformationdynamodb.json
 	@# "|| true" suffix because command fails when stack already exists
 	@# (even with --on-failure DO_NOTHING, a nonzero error code is returned)
-	$(AWS) cloudformation create-stack --stack-name db --template-body file://$< || true | tee $(LOG_DIR)/dynamodb-start.log
+	$(AWS) cloudformation create-stack --stack-name db-ZZ-REG-ID --template-body file://$< || true | tee $(LOG_DIR)/dynamodb-init.log
+	# Must give DynamoDB time to create the tables before running the loader
+	sleep 20
 
 # Update S1 and associated monitoring, rebuilding if necessary
 s1: $(LOG_DIR)/s1.repo.log cluster/s1.yaml cluster/s1-sm.yaml cluster/s1-vs.yaml
@@ -297,6 +324,9 @@ db: $(LOG_DIR)/db.repo.log cluster/awscred.yaml cluster/dynamodb-service-entry.y
 	$(KC) -n $(APP_NS) apply -f cluster/db.yaml | tee -a $(LOG_DIR)/db.log
 	$(KC) -n $(APP_NS) apply -f cluster/db-sm.yaml | tee -a $(LOG_DIR)/db.log
 	$(KC) -n $(APP_NS) apply -f cluster/db-vs.yaml | tee -a $(LOG_DIR)/db.log
+
+# Build & push the images up to the CR
+cri: $(LOG_DIR)/s1.repo.log $(LOG_DIR)/s2-$(S2_VER).repo.log $(LOG_DIR)/db.repo.log
 
 # Build the s1 service
 $(LOG_DIR)/s1.repo.log: s1/Dockerfile s1/app.py s1/requirements.txt

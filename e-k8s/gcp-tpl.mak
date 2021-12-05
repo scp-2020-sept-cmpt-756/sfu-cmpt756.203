@@ -24,7 +24,6 @@ LOG_DIR=logs
 NS=c756ns
 CLUSTER_NAME=gcp756
 GCP_CTX=gcp756
-ZONE=us-west1-c
 SUBNET_NAME=c756subnet
 
 # Small machines to stay in free tier
@@ -37,7 +36,17 @@ NUM_NODES=3 # This was default for Google's "My First Cluster"
 # no memory to spare
 #NUM_NODES=2
 
-# This version is supported for us-west2
+# Refer https://cloud.google.com/kubernetes-engine/versioning#available_versions
+#   for details on version and zones.
+#
+# Pay attention to the release channel chosen and the versions available within it.
+# The available channels are: rapid, regular, & stable.
+# As of 2021-02-04, the rapid channel for us-west1-c supports 1.18.12-gke.1205
+#
+# Also see the lskver target below.
+#
+ZONE=us-west1-c
+REL_CHAN=rapid
 KVER=1.19.3
 
 start:	showcontext
@@ -46,7 +55,7 @@ start:	showcontext
 	# The lines up to and including "metadata" are required for 756.
 	# The lines after that may or may not be necessary
 	$(GC) container clusters create $(CLUSTER_NAME) --zone $(ZONE) --num-nodes $(NUM_NODES) \
-	      --cluster-version "1.18.12-gke.1200" --release-channel "rapid" \
+	      --cluster-version "$(KVER)" --release-channel "$(REL_CHAN)" \
 	      --machine-type $(MACHINE_TYPE) --image-type $(IMAGE_TYPE) --disk-type $(DISK_TYPE) --disk-size $(DISK_SIZE) \
 	      --metadata disable-legacy-endpoints=true \
 	      --no-enable-basic-auth \
@@ -76,6 +85,11 @@ down:
 # Show current context and all GCP clusters
 # This currently duplicates target "status"
 ls: showcontext lsnc
+
+# use this to show versions available for your ZONE
+# refer: https://cloud.google.com/kubernetes-engine/versioning#available_versions
+lskver:
+	$(GC) container get-server-config --zone $(ZONE)
 
 # Show all GCP clusters
 lsnc:
